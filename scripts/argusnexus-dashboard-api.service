@@ -1,0 +1,35 @@
+[Unit]
+Description=ArgusNexus V4 Dashboard API - Bloomberg Terminal
+Documentation=http://localhost:8000
+After=network.target
+
+[Service]
+Type=simple
+User=tony
+Group=tony
+WorkingDirectory=/home/tony/ArgusNexus-V4-Core
+ExecStart=/home/tony/ArgusNexus-V4-Core/venv/bin/uvicorn src.api.main:app --host 127.0.0.1 --port 8000
+Restart=always
+RestartSec=10
+
+# Environment
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONPATH=/home/tony/ArgusNexus-V4-Core
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=argusnexus-api
+
+# Security
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/tony/ArgusNexus-V4-Core/data
+
+# Timeouts
+TimeoutStartSec=30
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

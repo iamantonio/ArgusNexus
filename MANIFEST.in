@@ -1,0 +1,29 @@
+# Include configuration files
+include config.yaml
+include .env.example
+include requirements.txt
+include pytest.ini
+
+# Include static files for dashboard
+recursive-include static *.html *.css *.js
+
+# Include documentation
+include README.md
+include CHANGELOG.md
+include CLAUDE.md
+
+# Include data directory structure (but not databases)
+recursive-include data *.csv
+prune data/*.db
+
+# Exclude development files
+exclude .mcp.json
+prune .claude
+prune .bmad
+prune .agentvibes
+prune runtime
+prune artifacts
+prune __pycache__
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude .DS_Store

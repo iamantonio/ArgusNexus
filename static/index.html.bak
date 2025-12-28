@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARGUSNEXUS V4 | TERMINAL</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Plotly.js for charts -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/static/css/bloomberg.css">
+</head>
+<body class="bb-terminal">
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         HEADER BAR
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <header class="bb-header">
+        <div class="bb-header-left">
+            <div class="bb-logo">
+                <span class="bb-logo-icon">&#9670;</span>
+                <span class="bb-logo-text">ARGUSNEXUS</span>
+                <span class="bb-logo-version">V4</span>
+            </div>
+        </div>
+
+        <div class="bb-header-center">
+            <div class="bb-ticker-strip" id="ticker-strip">
+                <span class="bb-ticker-loading">LOADING MARKETS...</span>
+            </div>
+        </div>
+
+        <div class="bb-header-right">
+            <div class="bb-strategy-selector">
+                <select id="strategy-select">
+                    <option value="portfolio_manager">PORTFOLIO MANAGER</option>
+                </select>
+            </div>
+            <button class="bb-theme-toggle" id="theme-toggle" title="Toggle Light/Dark Mode">
+                <span class="bb-theme-icon" id="theme-icon">&#9788;</span>
+            </button>
+            <div class="bb-timestamp" id="timestamp">--:--:-- UTC</div>
+        </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         MAIN GRID
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <main class="bb-main">
+
+        <!-- ═══════════════════════════════════════════════════════════════════
+             SCOREBOARD ROW
+             ═══════════════════════════════════════════════════════════════════ -->
+        <section class="bb-panel bb-scoreboard">
+            <div class="bb-panel-header">
+                <span class="bb-panel-title">SCOREBOARD</span>
+                <span class="bb-panel-status" id="system-status">SYSTEM NOMINAL</span>
+            </div>
+            <div class="bb-metrics-row">
+                <div class="bb-metric bb-metric-primary" id="metric-equity">
+                    <div class="bb-metric-label">TOTAL EQUITY</div>
+                    <div class="bb-metric-value">$0.00</div>
+                    <div class="bb-metric-sub">PORTFOLIO VALUE</div>
+                </div>
+                <div class="bb-metric" id="metric-cash">
+                    <div class="bb-metric-label">CASH</div>
+                    <div class="bb-metric-value">$0.00</div>
+                    <div class="bb-metric-sub">USD BALANCE</div>
+                </div>
+                <div class="bb-metric" id="metric-btc">
+                    <div class="bb-metric-label">BTC VALUE</div>
+                    <div class="bb-metric-value">$0.00</div>
+                    <div class="bb-metric-sub">0.0000 BTC</div>
+                </div>
+                <div class="bb-metric" id="metric-total">
+                    <div class="bb-metric-label">TOTAL P&L</div>
+                    <div class="bb-metric-value">$0.00</div>
+                    <div class="bb-metric-sub">NET PERFORMANCE</div>
+                </div>
+                <div class="bb-metric" id="metric-winrate">
+                    <div class="bb-metric-label">WIN RATE</div>
+                    <div class="bb-metric-value">0.0%</div>
+                    <div class="bb-metric-sub">0W / 0L</div>
+                </div>
+                <div class="bb-metric" id="metric-fleet">
+                    <div class="bb-metric-label">FLEET</div>
+                    <div class="bb-metric-value">0</div>
+                    <div class="bb-metric-sub">ACTIVE POSITIONS</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════════════════════
+             MAIN CONTENT ROW
+             ═══════════════════════════════════════════════════════════════════ -->
+        <div class="bb-content-row">
+
+            <!-- CHART PANEL -->
+            <section class="bb-panel bb-chart-panel">
+                <div class="bb-panel-header">
+                    <span class="bb-panel-title">ASSET MONITOR</span>
+                    <div class="bb-chart-controls">
+                        <select id="chart-symbol">
+                            <option value="BTC-USD">BTC-USD</option>
+                            <option value="ETH-USD">ETH-USD</option>
+                            <option value="XRP-USD">XRP-USD</option>
+                            <option value="SOL-USD">SOL-USD</option>
+                            <option value="DOGE-USD">DOGE-USD</option>
+                            <option value="ADA-USD">ADA-USD</option>
+                            <option value="BCH-USD">BCH-USD</option>
+                            <option value="LINK-USD">LINK-USD</option>
+                        </select>
+                        <select id="chart-timeframe">
+                            <option value="FOUR_HOUR">4H</option>
+                            <option value="ONE_HOUR">1H</option>
+                            <option value="ONE_DAY">1D</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="bb-chart-container">
+                    <div id="price-chart"></div>
+                    <div class="bb-chart-overlay" id="chart-overlay">
+                        <div class="bb-chart-price" id="current-price">$0.00</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FLEET STATUS PANEL -->
+            <section class="bb-panel bb-fleet-panel">
+                <div class="bb-panel-header">
+                    <span class="bb-panel-title">FLEET STATUS</span>
+                    <span class="bb-panel-badge" id="fleet-count">0</span>
+                </div>
+                <div class="bb-table-container">
+                    <table class="bb-table" id="fleet-table">
+                        <thead>
+                            <tr>
+                                <th>ASSET</th>
+                                <th>SIDE</th>
+                                <th>ENTRY</th>
+                                <th>NOW</th>
+                                <th>P&L</th>
+                                <th>STOP</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fleet-body">
+                            <tr class="bb-table-empty">
+                                <td colspan="6">NO ACTIVE POSITIONS</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Position Details -->
+                <div class="bb-position-detail" id="position-detail">
+                    <div class="bb-detail-header">POSITION DETAIL</div>
+                    <div class="bb-detail-grid" id="detail-grid">
+                        <div class="bb-detail-item">
+                            <span class="bb-detail-label">ENTRY</span>
+                            <span class="bb-detail-value" id="detail-entry">--</span>
+                        </div>
+                        <div class="bb-detail-item">
+                            <span class="bb-detail-label">STOP</span>
+                            <span class="bb-detail-value bb-loss" id="detail-stop">--</span>
+                        </div>
+                        <div class="bb-detail-item">
+                            <span class="bb-detail-label">TARGET</span>
+                            <span class="bb-detail-value bb-profit" id="detail-target">--</span>
+                        </div>
+                        <div class="bb-detail-item">
+                            <span class="bb-detail-label">RISK</span>
+                            <span class="bb-detail-value" id="detail-risk">--</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════════
+             BOTTOM ROW
+             ═══════════════════════════════════════════════════════════════════ -->
+        <div class="bb-bottom-row">
+
+            <!-- TRADE HISTORY -->
+            <section class="bb-panel bb-history-panel">
+                <div class="bb-panel-header">
+                    <span class="bb-panel-title">MISSION HISTORY</span>
+                    <span class="bb-panel-badge" id="history-count">0</span>
+                </div>
+                <div class="bb-table-container bb-table-scroll">
+                    <table class="bb-table" id="history-table">
+                        <thead>
+                            <tr>
+                                <th>DATE</th>
+                                <th>ASSET</th>
+                                <th>SIDE</th>
+                                <th>ENTRY</th>
+                                <th>EXIT</th>
+                                <th>P&L</th>
+                                <th>REASON</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-body">
+                            <tr class="bb-table-empty">
+                                <td colspan="7">NO CLOSED TRADES</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- DECISION LOG -->
+            <section class="bb-panel bb-decisions-panel">
+                <div class="bb-panel-header">
+                    <span class="bb-panel-title">DECISION LOG</span>
+                    <span class="bb-panel-badge" id="decision-count">0</span>
+                </div>
+                <div class="bb-feed-container" id="decision-feed">
+                    <div class="bb-feed-empty">AWAITING DECISIONS...</div>
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         STATUS BAR
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <footer class="bb-status-bar">
+        <div class="bb-status-left">
+            <span class="bb-status-item bb-status-ok" id="status-connection">
+                <span class="bb-status-dot"></span>
+                CONNECTED
+            </span>
+            <span class="bb-status-item">REFRESH: 60s</span>
+        </div>
+        <div class="bb-status-right">
+            <span class="bb-status-item" id="status-last-update">LAST: --</span>
+            <span class="bb-status-item">ARGUSNEXUS V4.0</span>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/charts.js"></script>
+    <script src="/static/js/app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,35 @@
+[Unit]
+Description=ArgusNexus V4 Paper Trader with Learning System
+Documentation=http://localhost:8000
+After=network.target
+
+[Service]
+Type=simple
+User=tony
+Group=tony
+WorkingDirectory=/home/tony/ArgusNexus-V4-Core
+ExecStart=/home/tony/ArgusNexus-V4-Core/venv/bin/python /home/tony/ArgusNexus-V4-Core/scripts/live_paper_trader.py --interval 1h --capital 500
+Restart=always
+RestartSec=30
+
+# Environment
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONPATH=/home/tony/ArgusNexus-V4-Core
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=argusnexus-paper
+
+# Security
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/tony/ArgusNexus-V4-Core/data
+
+# Timeouts
+TimeoutStartSec=30
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

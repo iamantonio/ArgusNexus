@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Dynamic OpenGraph tags (will be filled by API) -->
+    <meta property="og:title" content="Argus Decision Record" id="og-title">
+    <meta property="og:description" content="Full transparency trading decision" id="og-description">
+    <meta property="og:image" content="/api/decision-card-image" id="og-image">
+    <meta property="og:url" content="" id="og-url">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="Argus - The Honest Trading Bot">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@ArgusNexusAI">
+    <meta name="twitter:title" content="Argus Decision Record" id="tw-title">
+    <meta name="twitter:description" content="Every trade is traceable. See the full decision." id="tw-description">
+    <meta name="twitter:image" content="/api/decision-card-image" id="tw-image">
+
+    <title>Decision Record | Argus</title>
+
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a25;
+            --text-primary: #e0e0e0;
+            --text-secondary: #888;
+            --accent: #00d4aa;
+            --accent-dim: rgba(0, 212, 170, 0.2);
+            --success: #00c853;
+            --danger: #ff5252;
+            --warning: #ffc107;
+            --border: #2a2a35;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .tagline {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .decision-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .decision-header {
+            padding: 20px;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .decision-type {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .decision-type.long { background: rgba(0, 200, 83, 0.2); color: var(--success); }
+        .decision-type.short { background: rgba(255, 82, 82, 0.2); color: var(--danger); }
+        .decision-type.rejected { background: rgba(255, 193, 7, 0.2); color: var(--warning); }
+
+        .decision-id {
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .decision-body {
+            padding: 20px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .signal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .signal-item {
+            background: var(--bg-tertiary);
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .signal-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .signal-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .signal-value.positive { color: var(--success); }
+        .signal-value.negative { color: var(--danger); }
+
+        .risk-gates {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+        }
+
+        .risk-gate {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        .gate-status {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        .gate-status.passed { background: rgba(0, 200, 83, 0.2); color: var(--success); }
+        .gate-status.failed { background: rgba(255, 82, 82, 0.2); color: var(--danger); }
+
+        .reason-box {
+            background: var(--bg-tertiary);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid var(--accent);
+        }
+
+        .reason-text {
+            line-height: 1.6;
+        }
+
+        .timestamp {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 15px;
+            border-top: 1px solid var(--border);
+        }
+
+        .insight-section {
+            background: linear-gradient(135deg, var(--accent-dim), transparent);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .insight-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .insight-badge {
+            background: var(--accent);
+            color: var(--bg-primary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .verify-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: var(--accent);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: var(--text-secondary);
+        }
+
+        .error {
+            text-align: center;
+            padding: 50px;
+            color: var(--danger);
+        }
+
+        @media (max-width: 600px) {
+            .signal-grid, .risk-gates {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div>
+                <div class="logo">ARGUS</div>
+                <div class="tagline">The Only Trading Bot That Shows Its Work</div>
+            </div>
+            <a href="/" style="color: var(--accent); text-decoration: none;">Dashboard</a>
+        </header>
+
+        <div id="decision-content">
+            <div class="loading">Loading decision record...</div>
+        </div>
+
+        <footer class="footer">
+            <p>Every trade is traceable. Every loss is admitted.</p>
+            <p>Follow <a href="https://twitter.com/ArgusNexusAI" target="_blank">@ArgusNexusAI</a> for real-time updates.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Get decision ID from URL
+        const pathParts = window.location.pathname.split('/');
+        const decisionId = pathParts[pathParts.length - 1] || new URLSearchParams(window.location.search).get('id');
+
+        // Authentication state
+        let isAuthenticated = false;
+
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch('/api/auth/status', { credentials: 'include' });
+                const data = await response.json();
+                isAuthenticated = data.authenticated;
+            } catch (error) {
+                isAuthenticated = false;
+            }
+        }
+
+        async function loadDecision() {
+            const container = document.getElementById('decision-content');
+
+            if (!decisionId) {
+                container.innerHTML = '<div class="error">No decision ID provided.</div>';
+                return;
+            }
+
+            // Check auth first
+            await checkAuthStatus();
+
+            try {
+                const response = await fetch(`/api/decisions/${decisionId}`);
+
+                if (!response.ok) {
+                    throw new Error('Decision not found');
+                }
+
+                const decision = await response.json();
+                renderDecision(decision);
+
+                // Update OpenGraph tags
+                updateMetaTags(decision);
+
+            } catch (error) {
+                container.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        function updateMetaTags(decision) {
+            const title = `${decision.symbol} ${decision.result.toUpperCase()} | Argus`;
+            const description = decision.result_reason || 'Full transparency trading decision';
+
+            document.title = title;
+            document.getElementById('og-title').content = title;
+            document.getElementById('og-description').content = description;
+            document.getElementById('tw-title').content = title;
+            document.getElementById('tw-description').content = description;
+            document.getElementById('og-url').content = window.location.href;
+        }
+
+        function renderDecision(d) {
+            const container = document.getElementById('decision-content');
+
+            const signal = d.signal_values || {};
+            const riskChecks = d.risk_checks || {};
+            const market = d.market_context || {};
+
+            // Extract setup details for Donchian strategy values
+            const setup = market.setup_details || market.professional || {};
+            const layers = setup.layers || {};
+            const daily = layers.context_daily || {};
+            const h4 = layers.setup_4h || {};
+            const h1 = layers.timing_1h || {};
+
+            // Get the best available price and indicators
+            const currentPrice = market.current_price || setup.current_price || daily.current_price || signal.current_price || signal.close;
+            const dailyDonchian = daily.donchian || {};
+            const h4Donchian = h4.donchian || {};
+            const dailyRsi = daily.momentum?.rsi;
+            const sma200 = daily.moving_averages?.sma_200;
+            const grade = setup.grade || market.professional?.grade || market.grade;
+            const regime = market.regime || setup.regime;
+
+            // Determine decision type styling
+            let typeClass = 'rejected';
+            let typeLabel = d.result;
+            if (d.result === 'signal_long') {
+                typeClass = 'long';
+                typeLabel = 'LONG';
+            } else if (d.result === 'signal_short') {
+                typeClass = 'short';
+                typeLabel = 'SHORT';
+            } else if (d.result === 'signal_close') {
+                typeClass = 'short';
+                typeLabel = 'EXIT';
+            } else if (d.result === 'signal_hold') {
+                typeClass = 'rejected';
+                typeLabel = 'HOLD';
+            } else if (d.result === 'risk_rejected') {
+                typeClass = 'rejected';
+                typeLabel = 'BLOCKED';
+            } else if (d.result === 'no_signal') {
+                typeClass = 'rejected';
+                typeLabel = 'SCAN';
+            }
+
+            // Format price
+            const formatPrice = (p) => p ? `$${Number(p).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : '--';
+
+            // Format key names to be human-readable
+            const formatKey = (key) => key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+            // Render risk gates
+            let riskGatesHtml = '';
+            Object.entries(riskChecks).forEach(([gate, check]) => {
+                const passed = typeof check === 'object' ? check.passed : check;
+                const statusClass = passed ? 'passed' : 'failed';
+                const icon = passed ? '✓' : '✗';
+                const gateName = formatKey(gate);
+                riskGatesHtml += `
+                    <div class="risk-gate">
+                        <span class="gate-status ${statusClass}">${icon}</span>
+                        <span>${gateName}</span>
+                    </div>
+                `;
+            });
+
+            // Grade badge
+            const gradeColor = grade === 'A+' || grade === 'A' ? 'var(--success)' : grade === 'B' ? 'var(--warning)' : 'var(--text-secondary)';
+            const gradeHtml = grade ? `<span style="color:${gradeColor};font-weight:bold;margin-left:12px;">[Grade ${grade}]</span>` : '';
+
+            // Regime display
+            const regimeHtml = regime ? `<span style="color:var(--text-secondary);font-size:0.85rem;margin-left:8px;">${formatKey(regime)}</span>` : '';
+
+            container.innerHTML = `
+                <div class="decision-card">
+                    <div class="decision-header">
+                        <div>
+                            <span class="decision-type ${typeClass}">${typeLabel}</span>
+                            <span style="margin-left: 10px; font-size: 1.2rem;">${d.symbol}</span>
+                            ${gradeHtml}
+                            ${regimeHtml}
+                        </div>
+                        <span class="decision-id">${d.decision_id.slice(0, 8)}...</span>
+                    </div>
+
+                    <div class="decision-body">
+                        <div class="section">
+                            <div class="section-title">Market Data</div>
+                            <div class="signal-grid">
+                                <div class="signal-item">
+                                    <div class="signal-label">Current Price</div>
+                                    <div class="signal-value">${formatPrice(currentPrice)}</div>
+                                </div>
+                                ${dailyDonchian.upper_channel ? `
+                                <div class="signal-item">
+                                    <div class="signal-label">Donchian Upper (Daily)</div>
+                                    <div class="signal-value positive">${formatPrice(dailyDonchian.upper_channel)}</div>
+                                </div>
+                                ` : ''}
+                                ${dailyDonchian.lower_channel ? `
+                                <div class="signal-item">
+                                    <div class="signal-label">Donchian Lower (Daily)</div>
+                                    <div class="signal-value negative">${formatPrice(dailyDonchian.lower_channel)}</div>
+                                </div>
+                                ` : ''}
+                                ${sma200 ? `
+                                <div class="signal-item">
+                                    <div class="signal-label">SMA 200</div>
+                                    <div class="signal-value">${formatPrice(sma200)}</div>
+                                </div>
+                                ` : ''}
+                                ${dailyRsi ? `
+                                <div class="signal-item">
+                                    <div class="signal-label">RSI (Daily)</div>
+                                    <div class="signal-value ${dailyRsi > 70 ? 'positive' : dailyRsi < 30 ? 'negative' : ''}">${dailyRsi.toFixed(1)}</div>
+                                </div>
+                                ` : ''}
+                                ${setup.risk?.stop ? `
+                                <div class="signal-item">
+                                    <div class="signal-label">Stop Loss</div>
+                                    <div class="signal-value negative">${formatPrice(setup.risk.stop)}</div>
+                                </div>
+                                ` : ''}
+                                ${setup.risk?.target ? `
+                                <div class="signal-item">
+                                    <div class="signal-label">Take Profit</div>
+                                    <div class="signal-value positive">${formatPrice(setup.risk.target)}</div>
+                                </div>
+                                ` : ''}
+                                ${setup.risk?.risk_reward ? `
+                                <div class="signal-item">
+                                    <div class="signal-label">Risk:Reward</div>
+                                    <div class="signal-value">1:${setup.risk.risk_reward.toFixed(1)}</div>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <div class="section-title">Risk Gate Checks</div>
+                            <div class="risk-gates">
+                                ${riskGatesHtml}
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <div class="section-title">Reasoning</div>
+                            <div class="reason-box">
+                                <div class="reason-text">
+                                    ${d.result_reason
+                                      ? d.result_reason.split(',').map(r => `<div style="padding: 4px 0;">• ${r.trim()}</div>`).join('')
+                                      : 'No specific reason was recorded for this decision.'}
+                                </div>
+                            </div>
+                        </div>
+
+                        ${d.llm_insight ? `
+                        <div class="insight-section">
+                            <div class="insight-title">
+                                <span class="insight-badge">AI Analysis</span>
+                                <span style="color: var(--text-secondary); font-size: 0.8rem;">Powered by GPT-4</span>
+                            </div>
+                            <p>${d.llm_insight.summary || 'Analysis is not available for this decision.'}</p>
+                        </div>
+                        ` : (isAuthenticated ? `
+                        <button class="verify-btn" onclick="loadInsight('${d.decision_id}')">
+                            Generate AI Analysis
+                        </button>
+                        ` : '')}
+                    </div>
+
+                    <div class="timestamp">
+                        Decision recorded at ${new Date(d.timestamp).toLocaleString()}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadInsight(decisionId) {
+            try {
+                const response = await fetch(`/api/decisions/${decisionId}/insight?verify_market=true`);
+                if (response.ok) {
+                    const data = await response.json();
+                    // Reload the full decision
+                    loadDecision();
+                }
+            } catch (error) {
+                console.error('Failed to load insight:', error);
+            }
+        }
+
+        // Load on page ready
+        loadDecision();
+    </script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+# ArgusNexus Configuration - EXAMPLE
+# Copy this file to config.yaml and customize for your setup
+
+system:
+  data_source: "coinbase"
+  interval: "4h"
+  db_path: "data/demo.db"  # Use demo.db for testing, create your own for live
+  log_level: "INFO"
+
+# Fleet configuration - which symbols to trade
+fleet:
+  roster:
+    - "BTC-USD"
+    - "ETH-USD"
+  capital_per_unit: 10000  # USD per trading unit
+  heartbeat_interval_seconds: 60
+
+# Risk Management - The 10-Layer Risk Gate
+# IMPORTANT: These are example values. Adjust based on your risk tolerance.
+risk:
+  risk_per_trade_pct: 1.0          # Max 1% of capital per trade
+  daily_loss_limit_pct: 2.0        # Stop trading if down 2% today
+  max_trades_per_hour: 5           # Prevent overtrading
+  max_drawdown_pct: 5.0            # Max portfolio drawdown
+  circuit_breaker_pct: 8.0         # Emergency halt threshold
+  circuit_breaker_window_minutes: 60
+  circuit_breaker_cooldown_minutes: 30
+  min_risk_reward_ratio: 2.0       # Minimum R:R for entries
+  max_asset_concentration_pct: 35.0  # Max exposure to single asset
+  max_correlated_exposure_pct: 50.0  # Max exposure to correlated assets
+  max_leverage_per_position: 1.0   # No leverage (1x)
+  max_portfolio_leverage: 1.0
+
+# Portfolio Guardian - Last Line of Defense
+portfolio:
+  catastrophic_stop_pct: 15.0      # Emergency exit threshold
+  guardian_check_interval_seconds: 60
+
+# Strategy Configuration - TURTLE-4 "The Ratchet"
+strategy:
+  donchian:
+    entry_period: 55               # Donchian channel period
+    exit_period: 55
+    atr_period: 14
+    stop_multiplier: 2.0           # Initial stop: 2x ATR
+    tp_multiplier: 4.0             # Take profit: 4x ATR
+    chandelier_multiplier: 3.0     # Chandelier exit: 3x ATR
+    trend_period: 200              # SMA period for trend filter
+    volume_avg_period: 20
+    volume_multiplier: 1.5         # Volume must be 1.5x average
+    adx_period: 14
+    adx_threshold: 25.0
+    use_adx_filter: true
+
+# Session Management - Time-aware trading
+session:
+  timezone: "UTC"
+  dead_zone_start_hour: 22         # Low liquidity period start
+  dead_zone_end_hour: 0            # Low liquidity period end
+  min_liquidity_ratio: 0.3
+  max_spread_bps: 50.0
+  session_reset_hour: 0
+  notify_on_dead_zone: true
+  notify_on_session_change: false
+
+# Multi-Timeframe Analysis
+multi_timeframe:
+  enabled: true
+  conflict_resolution: "require_alignment"
+  timeframes:
+    - interval: "1h"
+      weight: 0.4
+      strategy: "donchian"
+      enabled: true
+    - interval: "4h"
+      weight: 0.6
+      strategy: "donchian"
+      enabled: true
+
+# Portfolio-Level Risk Coordination
+portfolio_risk:
+  max_portfolio_exposure_pct: 80.0
+  max_correlation_group_pct: 50.0
+  max_combined_daily_loss_pct: 5.0
+  cross_asset_circuit_breaker_pct: 10.0
+  circuit_breaker_window_minutes: 60
+  circuit_breaker_cooldown_minutes: 30
+  correlation_groups:
+    large_cap:
+      - "BTC-USD"
+      - "ETH-USD"
+    layer2:
+      - "SOL-USD"
+
+# Orchestrator Settings
+orchestrator:
+  tick_interval_seconds: 60
+  dead_zone_check_interval_seconds: 300
+  total_capital: 10000  # Starting capital for paper trading

@@ -1,0 +1,37 @@
+# ArgusNexus V4 Core Dependencies
+
+# Data & Analysis
+pandas>=2.0.0
+numpy>=1.24.0
+
+# API & Web
+fastapi>=0.100.0
+uvicorn>=0.23.0
+requests>=2.31.0
+aiohttp>=3.9.0  # Async HTTP for scanner
+httpx>=0.24.0  # Twitter API integration
+pytest-asyncio>=0.21.0
+tenacity>=8.2.0
+
+# Discord Bot
+discord.py>=2.3.0
+python-dotenv>=1.0.0
+
+# Database
+# SQLite is built-in
+aiosqlite>=0.19.0
+websockets>=11.0.0
+
+# Configuration
+PyYAML>=6.0.0
+PyJWT>=2.8.0
+cryptography>=41.0.0
+
+# Trading (Coinbase)
+# coinbase-advanced-py>=1.0.0  # Uncomment when ready for live trading
+
+# LLM Insights
+openai>=1.0.0  # For GPT-powered decision insights
+
+# Image Generation (Social Cards)
+Pillow>=10.0.0  # OG image generation for Twitter/X

@@ -1,0 +1,21 @@
+[Unit]
+Description=ArgusNexus V4 Portfolio Trader - Combined Strategy
+After=network.target
+Documentation=http://localhost:8000
+
+[Service]
+Type=simple
+User=tony
+WorkingDirectory=/home/tony/ArgusNexus-V4-Core
+ExecStart=/home/tony/ArgusNexus-V4-Core/venv/bin/python3 scripts/live_portfolio_trader.py --capital 500 --interval 1d
+Restart=always
+RestartSec=60
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=argusnexus-portfolio
+
+# Environment
+Environment="PYTHONUNBUFFERED=1"
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,113 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "argusnexus-v4-core"
+version = "4.1.0"
+description = "Truth Engine-powered trading system with Glass Box observability"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+authors = [
+    {name = "Tony"}
+]
+keywords = ["trading", "cryptocurrency", "bitcoin", "algo-trading", "backtest"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Financial and Insurance Industry",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business :: Financial :: Investment",
+]
+
+dependencies = [
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "fastapi>=0.100.0",
+    "uvicorn>=0.23.0",
+    "requests>=2.31.0",
+    "aiohttp>=3.9.0",
+    "tenacity>=8.2.0",
+    "discord.py>=2.3.0",
+    "python-dotenv>=1.0.0",
+    "aiosqlite>=0.19.0",
+    "websockets>=11.0.0",
+    "PyYAML>=6.0.0",
+    "PyJWT>=2.8.0",
+    "cryptography>=41.0.0",
+    "openai>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "mypy>=1.0.0",
+]
+live = [
+    "coinbase-advanced-py>=1.0.0",
+]
+
+[project.scripts]
+argus-backtest = "scripts.run_backtest:main"
+argus-paper = "scripts.live_paper_trader:main"
+argus-portfolio = "scripts.live_portfolio_trader:main"
+
+[project.urls]
+Homepage = "https://github.com/your-repo/ArgusNexus-V4-Core"
+"Bug Tracker" = "https://github.com/your-repo/ArgusNexus-V4-Core/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.setuptools.package-data]
+"*" = ["*.yaml", "*.json", "*.html", "*.css", "*.js"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+addopts = "-v --tb=short"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py39", "py310", "py311", "py312"]
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+    | \.venv
+    | build
+    | dist
+    | __pycache__
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+skip_gitignore = true
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_ignores = true
+ignore_missing_imports = true
+exclude = [
+    "tests/",
+    "scripts/",
+]

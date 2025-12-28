@@ -1,0 +1,3054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARGUS NEXUS | Neural Core</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Exo+2:wght@200;300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --void: #030308;
+            --void-deep: #010103;
+            --neural-cyan: #00f5ff;
+            --neural-cyan-dim: rgba(0, 245, 255, 0.3);
+            --synapse-purple: #a855f7;
+            --synapse-magenta: #ec4899;
+            --signal-green: #00ff88;
+            --signal-green-dim: rgba(0, 255, 136, 0.2);
+            --warning-amber: #fbbf24;
+            --alert-red: #ef4444;
+            --thought-blue: #3b82f6;
+            --plasma-white: rgba(255, 255, 255, 0.95);
+            --ghost-white: rgba(255, 255, 255, 0.6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: var(--void);
+            font-family: 'Exo 2', sans-serif;
+            color: var(--ghost-white);
+        }
+
+        /* Atmospheric Background */
+        .atmosphere {
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 50% 50%, rgba(0, 245, 255, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 40% at 30% 70%, rgba(168, 85, 247, 0.02) 0%, transparent 40%),
+                radial-gradient(ellipse 50% 50% at 70% 30%, rgba(0, 255, 136, 0.02) 0%, transparent 40%),
+                var(--void);
+            z-index: 0;
+        }
+
+        .atmosphere::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+        }
+
+        /* Particle Canvas */
+        #particles {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Main Container */
+        .neural-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        /* Header - Minimal */
+        .neural-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: linear-gradient(to bottom, rgba(3, 3, 8, 0.8) 0%, transparent 100%);
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1.4rem;
+            letter-spacing: 0.25em;
+            background: linear-gradient(135deg, var(--neural-cyan) 0%, var(--synapse-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo span {
+            font-weight: 400;
+            opacity: 0.6;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 24px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.08em;
+            opacity: 0.7;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--signal-green);
+            box-shadow: 0 0 10px var(--signal-green), 0 0 20px var(--signal-green);
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        .status-dot.processing {
+            background: var(--neural-cyan);
+            box-shadow: 0 0 10px var(--neural-cyan), 0 0 20px var(--neural-cyan);
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        /* Central Brain Core */
+        .brain-core {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Risk Shield Layers - 10 Concentric Rings */
+        .risk-shields {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            animation: rotate-slow 120s linear infinite;
+        }
+
+        .shield-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            border-radius: 50%;
+            border: 1px solid;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            animation: shield-pulse 4s ease-in-out infinite;
+        }
+
+        .shield-ring:nth-child(1) { width: 100%; height: 100%; border-color: rgba(0, 245, 255, 0.1); animation-delay: 0s; }
+        .shield-ring:nth-child(2) { width: 92%; height: 92%; border-color: rgba(0, 245, 255, 0.12); animation-delay: 0.2s; }
+        .shield-ring:nth-child(3) { width: 84%; height: 84%; border-color: rgba(0, 245, 255, 0.14); animation-delay: 0.4s; }
+        .shield-ring:nth-child(4) { width: 76%; height: 76%; border-color: rgba(168, 85, 247, 0.15); animation-delay: 0.6s; }
+        .shield-ring:nth-child(5) { width: 68%; height: 68%; border-color: rgba(168, 85, 247, 0.18); animation-delay: 0.8s; }
+        .shield-ring:nth-child(6) { width: 60%; height: 60%; border-color: rgba(168, 85, 247, 0.2); animation-delay: 1s; }
+        .shield-ring:nth-child(7) { width: 52%; height: 52%; border-color: rgba(236, 72, 153, 0.22); animation-delay: 1.2s; }
+        .shield-ring:nth-child(8) { width: 44%; height: 44%; border-color: rgba(236, 72, 153, 0.25); animation-delay: 1.4s; }
+        .shield-ring:nth-child(9) { width: 36%; height: 36%; border-color: rgba(0, 255, 136, 0.3); animation-delay: 1.6s; }
+        .shield-ring:nth-child(10) { width: 28%; height: 28%; border-color: rgba(0, 255, 136, 0.4); animation-delay: 1.8s; }
+
+        .shield-ring.active {
+            border-width: 2px;
+            box-shadow: 0 0 20px currentColor, inset 0 0 20px currentColor;
+        }
+
+        @keyframes shield-pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Neural Network SVG */
+        .neural-network {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            animation: rotate-reverse 90s linear infinite;
+        }
+
+        @keyframes rotate-reverse {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(-360deg); }
+        }
+
+        .neural-path {
+            fill: none;
+            stroke: var(--neural-cyan);
+            stroke-width: 1;
+            opacity: 0.3;
+            stroke-dasharray: 5 10;
+            animation: dash-flow 3s linear infinite;
+        }
+
+        .neural-path.active {
+            stroke-width: 2;
+            opacity: 0.8;
+            filter: drop-shadow(0 0 8px var(--neural-cyan));
+        }
+
+        @keyframes dash-flow {
+            to { stroke-dashoffset: -30; }
+        }
+
+        .neural-node {
+            fill: var(--void);
+            stroke: var(--neural-cyan);
+            stroke-width: 1.5;
+            filter: drop-shadow(0 0 5px var(--neural-cyan));
+        }
+
+        .neural-node.active {
+            fill: var(--neural-cyan);
+            animation: node-pulse 1s ease-in-out infinite;
+        }
+
+        .neural-node.decision {
+            stroke: var(--synapse-purple);
+            filter: drop-shadow(0 0 8px var(--synapse-purple));
+        }
+
+        .neural-node.decision.active {
+            fill: var(--synapse-purple);
+        }
+
+        @keyframes node-pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.7; }
+        }
+
+        /* Core Hexagon */
+        .core-hex {
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hex-outer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            animation: hex-rotate 20s linear infinite;
+        }
+
+        .hex-inner {
+            position: absolute;
+            width: 70%;
+            height: 70%;
+            animation: hex-rotate 15s linear infinite reverse;
+        }
+
+        .hex-core {
+            position: absolute;
+            width: 40%;
+            height: 40%;
+            animation: hex-rotate 10s linear infinite;
+        }
+
+        @keyframes hex-rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .hex-shape {
+            width: 100%;
+            height: 100%;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            border: 2px solid var(--neural-cyan);
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+            box-shadow:
+                0 0 30px rgba(0, 245, 255, 0.3),
+                inset 0 0 30px rgba(0, 245, 255, 0.1);
+        }
+
+        .hex-inner .hex-shape {
+            border-color: var(--synapse-purple);
+            box-shadow:
+                0 0 20px rgba(168, 85, 247, 0.4),
+                inset 0 0 20px rgba(168, 85, 247, 0.1);
+        }
+
+        .hex-core .hex-shape {
+            border-color: var(--signal-green);
+            background: radial-gradient(circle, rgba(0, 255, 136, 0.3) 0%, transparent 70%);
+            box-shadow:
+                0 0 40px rgba(0, 255, 136, 0.5),
+                inset 0 0 20px rgba(0, 255, 136, 0.2);
+            animation: core-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes core-glow {
+            0%, 100% {
+                box-shadow:
+                    0 0 40px rgba(0, 255, 136, 0.5),
+                    inset 0 0 20px rgba(0, 255, 136, 0.2);
+            }
+            50% {
+                box-shadow:
+                    0 0 60px rgba(0, 255, 136, 0.8),
+                    inset 0 0 40px rgba(0, 255, 136, 0.4);
+            }
+        }
+
+        /* ========== CONSCIOUSNESS TERMINAL ========== */
+        .consciousness-terminal {
+            position: fixed;
+            top: 50%;
+            left: 30px;
+            transform: translateY(-50%);
+            width: 280px;
+            height: 220px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            border-radius: 8px;
+            padding: 20px 16px 12px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--neural-cyan);
+            overflow: hidden;
+            z-index: 60;
+            backdrop-filter: blur(10px);
+            pointer-events: none;
+        }
+
+        .consciousness-terminal::before {
+            content: 'CONSCIOUSNESS STREAM';
+            position: absolute;
+            top: 6px;
+            left: 16px;
+            font-size: 0.55rem;
+            letter-spacing: 0.15em;
+            color: var(--ghost-white);
+            opacity: 0.4;
+        }
+
+        .thought-line {
+            margin-bottom: 6px;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: thought-appear 0.3s ease-out forwards;
+            line-height: 1.4;
+        }
+
+        .thought-line.reasoning {
+            color: var(--synapse-purple);
+            padding-left: 12px;
+            border-left: 2px solid var(--synapse-purple);
+        }
+
+        .thought-line.conclusion {
+            color: var(--signal-green);
+            font-weight: 600;
+        }
+
+        .thought-line.alert {
+            color: var(--warning-amber);
+        }
+
+        .thought-line.danger {
+            color: var(--alert-red);
+        }
+
+        .thought-line .prefix {
+            opacity: 0.5;
+            margin-right: 6px;
+        }
+
+        @keyframes thought-appear {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ========== CONFIDENCE METER ========== */
+        .confidence-ring {
+            position: absolute;
+            width: 380px;
+            height: 380px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            background: conic-gradient(from 0deg,
+                var(--neural-cyan) 0%,
+                var(--synapse-purple) 25%,
+                var(--synapse-magenta) 50%,
+                var(--signal-green) 75%,
+                var(--neural-cyan) 100%
+            );
+            -webkit-mask: radial-gradient(transparent 48%, black 49%, black 51%, transparent 52%);
+            mask: radial-gradient(transparent 48%, black 49%, black 51%, transparent 52%);
+            opacity: 0.3;
+            animation: confidence-spin 8s linear infinite;
+        }
+
+        .confidence-ring.strong {
+            opacity: 0.8;
+            animation: confidence-spin 3s linear infinite, confidence-pulse 0.5s ease-in-out infinite;
+        }
+
+        @keyframes confidence-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes confidence-pulse {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.05); }
+        }
+
+        /* ========== MARKET REGIME INDICATOR ========== */
+        .regime-indicator {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            z-index: 90;
+            backdrop-filter: blur(10px);
+        }
+
+        .regime-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--ghost-white);
+            animation: regime-pulse 2s ease-in-out infinite;
+        }
+
+        .regime-indicator.bullish .regime-dot {
+            background: var(--signal-green);
+            box-shadow: 0 0 10px var(--signal-green);
+        }
+
+        .regime-indicator.bearish .regime-dot {
+            background: var(--alert-red);
+            box-shadow: 0 0 10px var(--alert-red);
+        }
+
+        .regime-indicator.neutral .regime-dot {
+            background: var(--warning-amber);
+            box-shadow: 0 0 10px var(--warning-amber);
+        }
+
+        @keyframes regime-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .regime-label {
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+
+        .regime-price {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        /* ========== DECISION VERDICT OVERLAY ========== */
+        .verdict-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            padding: 20px 40px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid var(--signal-green);
+            border-radius: 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease-out;
+        }
+
+        .verdict-overlay.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .verdict-overlay.buy {
+            border-color: var(--signal-green);
+            color: var(--signal-green);
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.5), inset 0 0 40px rgba(0, 255, 136, 0.1);
+        }
+
+        .verdict-overlay.sell {
+            border-color: var(--alert-red);
+            color: var(--alert-red);
+            box-shadow: 0 0 40px rgba(239, 68, 68, 0.5), inset 0 0 40px rgba(239, 68, 68, 0.1);
+        }
+
+        .verdict-overlay.hold {
+            border-color: var(--warning-amber);
+            color: var(--warning-amber);
+            box-shadow: 0 0 40px rgba(251, 191, 36, 0.5), inset 0 0 40px rgba(251, 191, 36, 0.1);
+        }
+
+        .verdict-reason {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 400;
+            margin-top: 8px;
+            opacity: 0.7;
+            letter-spacing: 0.05em;
+            text-align: center;
+        }
+
+        /* ========== REASONING PATH ========== */
+        .reasoning-path {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 500px;
+            height: 500px;
+            pointer-events: none;
+            z-index: 55;
+        }
+
+        .path-label {
+            position: absolute;
+            padding: 4px 8px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--neural-cyan);
+            border-radius: 4px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.6rem;
+            color: var(--neural-cyan);
+            white-space: nowrap;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.3s ease;
+        }
+
+        .path-label.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .path-label.passed {
+            border-color: var(--signal-green);
+            color: var(--signal-green);
+        }
+
+        .path-label.failed {
+            border-color: var(--alert-red);
+            color: var(--alert-red);
+        }
+
+        /* Thought Streams - HIDDEN on desktop (neural viz shows data) */
+        .thought-stream {
+            display: none;
+        }
+
+        .thought-stream.left {
+            left: 20px;
+            align-items: flex-start;
+        }
+
+        .thought-stream.right {
+            right: 20px;
+            align-items: flex-end;
+        }
+
+        .thought-bubble {
+            padding: 12px 16px;
+            background: rgba(0, 245, 255, 0.05);
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            border-radius: 4px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+            color: var(--neural-cyan);
+            backdrop-filter: blur(10px);
+            animation: thought-fade 0.5s ease-out forwards;
+            opacity: 0;
+            transform: translateX(-20px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .thought-stream.right .thought-bubble {
+            transform: translateX(20px);
+            border-color: rgba(168, 85, 247, 0.2);
+            background: rgba(168, 85, 247, 0.05);
+            color: var(--synapse-purple);
+        }
+
+        .thought-bubble::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: currentColor;
+            opacity: 0.5;
+        }
+
+        .thought-bubble .label {
+            font-size: 0.75rem;
+            opacity: 0.5;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .thought-bubble.signal-buy {
+            border-color: rgba(0, 255, 136, 0.3);
+            background: rgba(0, 255, 136, 0.08);
+            color: var(--signal-green);
+        }
+
+        .thought-bubble.signal-sell {
+            border-color: rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.08);
+            color: var(--alert-red);
+        }
+
+        .thought-bubble.risk-alert {
+            border-color: rgba(251, 191, 36, 0.3);
+            background: rgba(251, 191, 36, 0.08);
+            color: var(--warning-amber);
+        }
+
+        @keyframes thought-fade {
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Data Rivers - Flowing Lines */
+        .data-river {
+            position: fixed;
+            height: 1px;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                var(--neural-cyan) 20%,
+                var(--neural-cyan) 80%,
+                transparent 100%
+            );
+            opacity: 0.3;
+            animation: river-flow 3s linear infinite;
+        }
+
+        .data-river.vertical {
+            width: 1px;
+            height: auto;
+            background: linear-gradient(180deg,
+                transparent 0%,
+                var(--synapse-purple) 20%,
+                var(--synapse-purple) 80%,
+                transparent 100%
+            );
+        }
+
+        @keyframes river-flow {
+            0% { opacity: 0.1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 0.1; }
+        }
+
+        /* Position Health Panel - Shows current position with stop distances */
+        .position-health-panel {
+            position: fixed;
+            bottom: 100px;
+            left: 30px;
+            width: 220px;
+            padding: 16px;
+            background: rgba(3, 3, 8, 0.9);
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            border-radius: 8px;
+            backdrop-filter: blur(20px);
+            z-index: 100;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .position-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(0, 245, 255, 0.1);
+        }
+
+        .position-symbol {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--neural-cyan);
+        }
+
+        .position-pnl {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .position-pnl.positive { color: var(--signal-green); }
+        .position-pnl.negative { color: var(--alert-red); }
+
+        .position-details {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .position-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+        }
+
+        .pos-label {
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .pos-value {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .pos-value.stop-value {
+            color: var(--warning-amber);
+        }
+
+        .health-bar-container {
+            margin-top: 8px;
+        }
+
+        .health-bar-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(255, 255, 255, 0.3);
+            margin-bottom: 6px;
+        }
+
+        .health-bar {
+            position: relative;
+            height: 8px;
+            background: linear-gradient(90deg,
+                var(--alert-red) 0%,
+                var(--warning-amber) 30%,
+                var(--signal-green) 100%
+            );
+            border-radius: 4px;
+            overflow: visible;
+        }
+
+        .health-bar-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .health-bar-marker {
+            position: absolute;
+            top: -4px;
+            width: 3px;
+            height: 16px;
+            border-radius: 2px;
+            transform: translateX(-50%);
+        }
+
+        .health-bar-marker.chandelier {
+            background: var(--synapse-purple);
+            box-shadow: 0 0 6px var(--synapse-purple);
+        }
+
+        .health-bar-marker.hardstop {
+            background: var(--alert-red);
+            box-shadow: 0 0 6px var(--alert-red);
+        }
+
+        .health-bar-legend {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .legend-safe { color: var(--signal-green); }
+        .legend-danger { color: var(--alert-red); }
+
+        /* Decision Panel - Compact, clean */
+        .decision-panel {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 40px;
+            padding: 16px 40px;
+            background: rgba(3, 3, 8, 0.85);
+            border: 1px solid rgba(0, 245, 255, 0.15);
+            border-radius: 12px;
+            backdrop-filter: blur(20px);
+            z-index: 100;
+        }
+
+        .decision-metric {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .metric-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            opacity: 0.4;
+        }
+
+        .metric-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .metric-value.positive { color: var(--signal-green); }
+        .metric-value.negative { color: var(--alert-red); }
+        .metric-value.neutral { color: var(--neural-cyan); }
+
+        .metric-bar {
+            width: 80px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .metric-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neural-cyan), var(--signal-green));
+            border-radius: 2px;
+            transition: width 0.5s ease-out;
+        }
+
+        /* Market Sentiment Indicator - subtle, doesn't clutter */
+        .sentiment-orb {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 50% 50%,
+                rgba(0, 255, 136, 0.08) 0%,
+                rgba(0, 245, 255, 0.04) 30%,
+                transparent 60%
+            );
+            filter: blur(60px);
+            animation: orb-breathe 6s ease-in-out infinite;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .sentiment-orb.bearish {
+            background: radial-gradient(circle at 30% 30%,
+                rgba(239, 68, 68, 0.4) 0%,
+                rgba(168, 85, 247, 0.2) 50%,
+                transparent 70%
+            );
+        }
+
+        @keyframes orb-breathe {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 0.9; }
+        }
+
+        /* Synapse Connections - Animated Lines */
+        .synapse-layer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .synapse-line {
+            position: absolute;
+            height: 1px;
+            background: linear-gradient(90deg,
+                transparent,
+                var(--neural-cyan) 20%,
+                var(--neural-cyan) 80%,
+                transparent
+            );
+            transform-origin: left center;
+            opacity: 0;
+            animation: synapse-fire 2s ease-out forwards;
+        }
+
+        @keyframes synapse-fire {
+            0% { opacity: 0; transform: scaleX(0); }
+            20% { opacity: 1; }
+            100% { opacity: 0; transform: scaleX(1); }
+        }
+
+        /* Risk Gate Visualization - HIDDEN (shown in neural network) */
+        .risk-gates {
+            display: none;
+        }
+
+        .risk-gate {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.85rem;
+            opacity: 0.4;
+            transition: all 0.3s ease;
+        }
+
+        .risk-gate.active {
+            opacity: 1;
+        }
+
+        .gate-indicator {
+            width: 8px;
+            height: 8px;
+            border: 1px solid var(--neural-cyan);
+            background: transparent;
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            transition: all 0.3s ease;
+        }
+
+        .risk-gate.active .gate-indicator {
+            background: var(--signal-green);
+            border-color: var(--signal-green);
+            box-shadow: 0 0 10px var(--signal-green);
+        }
+
+        .risk-gate.blocked .gate-indicator {
+            background: var(--alert-red);
+            border-color: var(--alert-red);
+            box-shadow: 0 0 10px var(--alert-red);
+        }
+
+        .gate-label {
+            color: var(--ghost-white);
+            letter-spacing: 0.1em;
+        }
+
+        /* Signal Flow Visualization - HIDDEN (shown in neural network) */
+        .signal-flow {
+            display: none;
+        }
+
+        .signal-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            background: rgba(0, 0, 0, 0.4);
+            border-left: 2px solid var(--synapse-purple);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .signal-type {
+            font-size: 0.75rem;
+            opacity: 0.5;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .signal-value {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+        }
+
+        /* Consciousness Waves */
+        .consciousness-wave {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 1px solid var(--neural-cyan);
+            opacity: 0;
+            animation: wave-expand 4s ease-out infinite;
+        }
+
+        .consciousness-wave:nth-child(2) { animation-delay: 1s; }
+        .consciousness-wave:nth-child(3) { animation-delay: 2s; }
+        .consciousness-wave:nth-child(4) { animation-delay: 3s; }
+
+        @keyframes wave-expand {
+            0% { transform: scale(0.5); opacity: 0.5; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        /* Processing Animation */
+        .processing-ring {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 2px dashed rgba(0, 245, 255, 0.3);
+            animation: process-spin 8s linear infinite;
+        }
+
+        @keyframes process-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Floating Data Points */
+        .data-point {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--neural-cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--neural-cyan);
+            animation: float-orbit 10s linear infinite;
+        }
+
+        @keyframes float-orbit {
+            from { transform: rotate(0deg) translateX(150px) rotate(0deg); }
+            to { transform: rotate(360deg) translateX(150px) rotate(-360deg); }
+        }
+
+        /* EMA Indicator Visualization */
+        .ema-display {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 80px;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .ema-line {
+            position: absolute;
+            bottom: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--neural-cyan);
+            opacity: 0.6;
+            transform-origin: left center;
+        }
+
+        .ema-line.slow {
+            background: var(--synapse-purple);
+            bottom: 45%;
+        }
+
+        .ema-label {
+            position: absolute;
+            right: -40px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .ema-line .ema-label { top: -16px; color: var(--neural-cyan); }
+        .ema-line.slow .ema-label { top: -16px; color: var(--synapse-purple); }
+
+        /* ATR Stop Visualization */
+        .atr-zone {
+            position: fixed;
+            bottom: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            z-index: 50;
+        }
+
+        .atr-bar {
+            width: 200px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .atr-stop {
+            position: absolute;
+            height: 100%;
+            background: linear-gradient(90deg, var(--alert-red), transparent);
+            width: 30%;
+        }
+
+        .atr-target {
+            position: absolute;
+            right: 0;
+            height: 100%;
+            background: linear-gradient(270deg, var(--signal-green), transparent);
+            width: 40%;
+        }
+
+        .atr-current {
+            position: absolute;
+            width: 4px;
+            height: 14px;
+            top: -4px;
+            background: var(--plasma-white);
+            border-radius: 2px;
+            left: 50%;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            transition: left 0.5s ease-out;
+        }
+
+        /* ========== NODE LABELS ========== */
+        .node-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 8px;
+            fill: var(--ghost-white);
+            text-anchor: middle;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .node-label.small {
+            font-size: 7px;
+        }
+
+        /* ========== NODE TYPE COLORS ========== */
+        .neural-node.data-input {
+            stroke: var(--neural-cyan);
+            fill: rgba(0, 245, 255, 0.1);
+        }
+
+        .neural-node.data-input.active {
+            fill: var(--neural-cyan);
+            filter: drop-shadow(0 0 15px var(--neural-cyan));
+        }
+
+        .neural-node.risk-gate-node {
+            stroke: var(--synapse-purple);
+            fill: rgba(168, 85, 247, 0.1);
+        }
+
+        .neural-node.risk-gate-node.active {
+            fill: var(--signal-green);
+            stroke: var(--signal-green);
+            filter: drop-shadow(0 0 15px var(--signal-green));
+        }
+
+        .neural-node.risk-gate-node.blocked {
+            fill: var(--alert-red);
+            stroke: var(--alert-red);
+            filter: drop-shadow(0 0 15px var(--alert-red));
+            animation: blocked-pulse 0.5s ease-in-out 3;
+        }
+
+        @keyframes blocked-pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.4); opacity: 0.7; }
+        }
+
+        .neural-node.strategy-node {
+            stroke: var(--synapse-magenta);
+            fill: rgba(236, 72, 153, 0.1);
+        }
+
+        .neural-node.strategy-node.active {
+            fill: var(--synapse-magenta);
+            filter: drop-shadow(0 0 12px var(--synapse-magenta));
+        }
+
+        /* ========== PATH FLOW COLORS ========== */
+        .neural-path.data-flow {
+            stroke: var(--neural-cyan);
+        }
+
+        .neural-path.data-flow.active {
+            stroke: var(--neural-cyan);
+            stroke-width: 3;
+            filter: drop-shadow(0 0 8px var(--neural-cyan));
+        }
+
+        .neural-path.risk-flow {
+            stroke: var(--synapse-purple);
+        }
+
+        .neural-path.risk-flow.active {
+            stroke: var(--signal-green);
+            stroke-width: 3;
+            filter: drop-shadow(0 0 8px var(--signal-green));
+        }
+
+        .neural-path.decision-flow {
+            stroke: var(--synapse-magenta);
+        }
+
+        .neural-path.decision-flow.active {
+            stroke: var(--synapse-magenta);
+            stroke-width: 3;
+            filter: drop-shadow(0 0 8px var(--synapse-magenta));
+        }
+
+        /* ========== LEGEND PANEL - Hidden, show on direct hover ========== */
+        .legend-panel {
+            position: fixed;
+            top: 100px;
+            left: 0;
+            background: rgba(3, 3, 8, 0.95);
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            border-left: none;
+            border-radius: 0 8px 8px 0;
+            padding: 16px 20px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            max-width: 180px;
+            opacity: 0;
+            transform: translateX(-100%);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .legend-panel::before {
+            content: '?';
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            background: rgba(0, 245, 255, 0.1);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            color: var(--neural-cyan);
+            cursor: pointer;
+        }
+
+        .legend-panel:hover {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .legend-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            color: var(--plasma-white);
+            margin-bottom: 12px;
+            letter-spacing: 0.1em;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            opacity: 0.8;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .legend-dot.cyan { background: var(--neural-cyan); box-shadow: 0 0 8px var(--neural-cyan); }
+        .legend-dot.purple { background: var(--synapse-purple); box-shadow: 0 0 8px var(--synapse-purple); }
+        .legend-dot.magenta { background: var(--synapse-magenta); box-shadow: 0 0 8px var(--synapse-magenta); }
+        .legend-dot.green { background: var(--signal-green); box-shadow: 0 0 8px var(--signal-green); }
+        .legend-dot.red { background: var(--alert-red); box-shadow: 0 0 8px var(--alert-red); }
+
+        .legend-section {
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .legend-section-title {
+            font-size: 0.65rem;
+            color: var(--ghost-white);
+            opacity: 0.5;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        /* ========== MOBILE RESPONSIVE ========== */
+        @media (max-width: 1200px) {
+            .legend-panel { display: none; }
+        }
+
+        @media (max-width: 900px) {
+            .neural-header {
+                padding: 16px 20px;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .status-bar {
+                gap: 16px;
+                font-size: 0.65rem;
+            }
+
+            .brain-core {
+                width: 420px;
+                height: 420px;
+            }
+
+            .decision-panel {
+                gap: 24px;
+                padding: 14px 28px;
+            }
+
+            .metric-value {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .logo {
+                font-size: 1.1rem;
+                letter-spacing: 0.2em;
+            }
+
+            .status-bar {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 12px;
+            }
+
+            .brain-core {
+                width: 300px;
+                height: 300px;
+            }
+
+            .node-label {
+                font-size: 6px;
+            }
+
+            /* Hide desktop decision panel on mobile */
+            .decision-panel {
+                display: none;
+            }
+
+            /* Hide desktop consciousness terminal */
+            .consciousness-terminal {
+                display: none;
+            }
+
+            .sentiment-orb {
+                width: 250px;
+                height: 250px;
+            }
+
+            .regime-indicator {
+                top: 70px;
+                font-size: 0.6rem;
+                padding: 6px 14px;
+            }
+
+            .regime-price {
+                font-size: 0.75rem;
+            }
+
+            .confidence-ring {
+                width: 260px;
+                height: 260px;
+            }
+
+            .verdict-overlay {
+                font-size: 1.1rem;
+                padding: 16px 28px;
+            }
+
+            /* ========== MOBILE SWIPEABLE PANELS ========== */
+            .mobile-panels {
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                z-index: 100;
+                padding: 15px 0;
+                background: linear-gradient(to top, rgba(3, 3, 8, 0.95) 0%, transparent 100%);
+            }
+
+            .mobile-panels::-webkit-scrollbar {
+                display: none;
+            }
+
+            .mobile-panel {
+                flex: 0 0 calc(100vw - 40px);
+                margin: 0 20px;
+                scroll-snap-align: center;
+                background: rgba(3, 3, 8, 0.9);
+                border: 1px solid rgba(0, 245, 255, 0.2);
+                border-radius: 12px;
+                padding: 16px;
+                backdrop-filter: blur(10px);
+            }
+
+            .mobile-panel:first-child {
+                margin-left: 20px;
+            }
+
+            .mobile-panel:last-child {
+                margin-right: 20px;
+            }
+
+            .panel-title {
+                font-family: 'Orbitron', sans-serif;
+                font-size: 0.6rem;
+                letter-spacing: 0.15em;
+                color: var(--ghost-white);
+                opacity: 0.5;
+                margin-bottom: 12px;
+                text-transform: uppercase;
+            }
+
+            /* Metrics Panel */
+            .mobile-metrics {
+                display: flex;
+                justify-content: space-around;
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+
+            .mobile-metric {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 4px;
+                min-width: 65px;
+            }
+
+            .mobile-metric-label {
+                font-family: 'Share Tech Mono', monospace;
+                font-size: 0.5rem;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                opacity: 0.4;
+            }
+
+            .mobile-metric-value {
+                font-family: 'Orbitron', sans-serif;
+                font-size: 1rem;
+                font-weight: 600;
+            }
+
+            /* Thoughts Panel */
+            .mobile-thoughts {
+                max-height: 120px;
+                overflow-y: auto;
+            }
+
+            .mobile-thought {
+                font-family: 'Share Tech Mono', monospace;
+                font-size: 0.65rem;
+                color: var(--neural-cyan);
+                margin-bottom: 6px;
+                line-height: 1.4;
+            }
+
+            .mobile-thought.reasoning {
+                color: var(--synapse-purple);
+                padding-left: 10px;
+                border-left: 2px solid var(--synapse-purple);
+            }
+
+            .mobile-thought.conclusion {
+                color: var(--signal-green);
+            }
+
+            .mobile-thought.alert {
+                color: var(--warning-amber);
+            }
+
+            /* Decision Panel */
+            .mobile-decision {
+                text-align: center;
+            }
+
+            .mobile-decision-result {
+                font-family: 'Orbitron', sans-serif;
+                font-size: 1.4rem;
+                font-weight: 700;
+                letter-spacing: 0.1em;
+                margin-bottom: 8px;
+            }
+
+            .mobile-decision-result.buy { color: var(--signal-green); }
+            .mobile-decision-result.sell { color: var(--alert-red); }
+            .mobile-decision-result.hold { color: var(--warning-amber); }
+
+            .mobile-decision-reason {
+                font-family: 'Share Tech Mono', monospace;
+                font-size: 0.6rem;
+                opacity: 0.7;
+            }
+
+            /* Panel indicators */
+            .panel-dots {
+                display: flex;
+                justify-content: center;
+                gap: 8px;
+                position: fixed;
+                bottom: 160px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 101;
+            }
+
+            .panel-dot {
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.3);
+                transition: all 0.3s ease;
+            }
+
+            .panel-dot.active {
+                background: var(--neural-cyan);
+                box-shadow: 0 0 8px var(--neural-cyan);
+            }
+        }
+
+        /* Hide mobile panels on desktop */
+        .mobile-panels, .panel-dots {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .mobile-panels, .panel-dots {
+                display: flex;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="atmosphere"></div>
+    <canvas id="particles"></canvas>
+
+    <!-- Header -->
+    <header class="neural-header">
+        <div class="logo">ARGUS<span>NEXUS</span></div>
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-dot processing"></div>
+                <span>NEURAL CORE ACTIVE</span>
+            </div>
+            <div class="status-item">
+                <div class="status-dot"></div>
+                <span>TRUTH ENGINE ONLINE</span>
+            </div>
+            <div class="status-item">
+                <span id="timestamp">--:--:--</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Market Sentiment Orb -->
+    <div class="sentiment-orb" id="sentimentOrb"></div>
+
+    <!-- Market Regime Indicator -->
+    <div class="regime-indicator neutral" id="regimeIndicator">
+        <div class="regime-dot"></div>
+        <span class="regime-label">ANALYZING</span>
+        <span class="regime-price" id="livePrice">--</span>
+    </div>
+
+    <!-- Decision Verdict Overlay -->
+    <div class="verdict-overlay" id="verdictOverlay">
+        <span id="verdictText">HOLD</span>
+        <div class="verdict-reason" id="verdictReason">Awaiting signal...</div>
+    </div>
+
+    <!-- Consciousness Terminal - The AI's thoughts (left side) -->
+    <div class="consciousness-terminal" id="consciousnessTerminal">
+        <div class="thought-line"><span class="prefix">></span> Initializing neural pathways...</div>
+    </div>
+
+    <!-- Legend Panel -->
+    <div class="legend-panel">
+        <div class="legend-title">NEURAL MAP</div>
+
+        <div class="legend-section-title">Data Inputs</div>
+        <div class="legend-item">
+            <div class="legend-dot cyan"></div>
+            <span>Market data feeds</span>
+        </div>
+
+        <div class="legend-section">
+            <div class="legend-section-title">Risk Gates</div>
+            <div class="legend-item">
+                <div class="legend-dot purple"></div>
+                <span>Risk checks pending</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot green"></div>
+                <span>Risk check passed</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot red"></div>
+                <span>Risk check blocked</span>
+            </div>
+        </div>
+
+        <div class="legend-section">
+            <div class="legend-section-title">Strategy</div>
+            <div class="legend-item">
+                <div class="legend-dot magenta"></div>
+                <span>Signal processing</span>
+            </div>
+        </div>
+
+        <div class="legend-section">
+            <div class="legend-section-title">Shields</div>
+            <div class="legend-item">
+                <span style="opacity: 0.7; font-size: 0.65rem;">10 rings = 10-layer risk gate protecting the core</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Neural Container -->
+    <div class="neural-container">
+        <div class="brain-core">
+            <!-- Consciousness Waves -->
+            <div class="consciousness-wave"></div>
+            <div class="consciousness-wave"></div>
+            <div class="consciousness-wave"></div>
+            <div class="consciousness-wave"></div>
+
+            <!-- Risk Shield Layers (10 rings) -->
+            <div class="risk-shields">
+                <div class="shield-ring" data-layer="1"></div>
+                <div class="shield-ring" data-layer="2"></div>
+                <div class="shield-ring" data-layer="3"></div>
+                <div class="shield-ring" data-layer="4"></div>
+                <div class="shield-ring" data-layer="5"></div>
+                <div class="shield-ring" data-layer="6"></div>
+                <div class="shield-ring" data-layer="7"></div>
+                <div class="shield-ring" data-layer="8"></div>
+                <div class="shield-ring" data-layer="9"></div>
+                <div class="shield-ring" data-layer="10"></div>
+            </div>
+
+            <!-- Neural Network SVG - MEANINGFUL ARCHITECTURE -->
+            <svg class="neural-network" viewBox="0 0 500 500">
+                <!-- ========== OUTER RING: DATA INPUTS ========== -->
+                <!-- These nodes light up when market data is received -->
+                <circle class="neural-node data-input" id="node-price" cx="250" cy="50" r="10"/>
+                <text x="250" y="30" class="node-label">PRICE</text>
+
+                <circle class="neural-node data-input" id="node-volume" cx="400" cy="100" r="10"/>
+                <text x="420" y="95" class="node-label">VOL</text>
+
+                <circle class="neural-node data-input" id="node-ema-fast" cx="450" cy="250" r="10"/>
+                <text x="470" y="255" class="node-label">EMA₁₂</text>
+
+                <circle class="neural-node data-input" id="node-ema-slow" cx="400" cy="400" r="10"/>
+                <text x="420" y="420" class="node-label">EMA₂₆</text>
+
+                <circle class="neural-node data-input" id="node-atr" cx="250" cy="450" r="10"/>
+                <text x="250" y="475" class="node-label">ATR</text>
+
+                <circle class="neural-node data-input" id="node-donchian" cx="100" cy="400" r="10"/>
+                <text x="55" y="420" class="node-label">DONCH</text>
+
+                <circle class="neural-node data-input" id="node-sma" cx="50" cy="250" r="10"/>
+                <text x="15" y="255" class="node-label">SMA₂₀₀</text>
+
+                <circle class="neural-node data-input" id="node-regime" cx="100" cy="100" r="10"/>
+                <text x="55" y="95" class="node-label">REGIME</text>
+
+                <!-- ========== MID RING: RISK GATES ========== -->
+                <!-- These pulse when risk checks run -->
+                <circle class="neural-node risk-gate-node" id="node-risk-size" cx="250" cy="120" r="12"/>
+                <text x="250" y="105" class="node-label small">SIZE</text>
+
+                <circle class="neural-node risk-gate-node" id="node-risk-dd" cx="350" cy="180" r="12"/>
+                <text x="375" y="175" class="node-label small">DD</text>
+
+                <circle class="neural-node risk-gate-node" id="node-risk-vol" cx="380" cy="300" r="12"/>
+                <text x="405" y="305" class="node-label small">VOL</text>
+
+                <circle class="neural-node risk-gate-node" id="node-risk-exp" cx="300" cy="380" r="12"/>
+                <text x="320" y="400" class="node-label small">EXP</text>
+
+                <circle class="neural-node risk-gate-node" id="node-risk-time" cx="180" cy="350" r="12"/>
+                <text x="150" y="370" class="node-label small">TIME</text>
+
+                <circle class="neural-node risk-gate-node" id="node-risk-final" cx="130" cy="220" r="12"/>
+                <text x="95" y="215" class="node-label small">GATE</text>
+
+                <!-- ========== INNER RING: STRATEGY LOGIC ========== -->
+                <circle class="neural-node strategy-node" id="node-signal" cx="250" cy="180" r="8"/>
+                <circle class="neural-node strategy-node" id="node-entry" cx="300" cy="220" r="8"/>
+                <circle class="neural-node strategy-node" id="node-exit" cx="300" cy="280" r="8"/>
+                <circle class="neural-node strategy-node" id="node-stop" cx="250" cy="320" r="8"/>
+                <circle class="neural-node strategy-node" id="node-target" cx="200" cy="280" r="8"/>
+                <circle class="neural-node strategy-node" id="node-sizing" cx="200" cy="220" r="8"/>
+
+                <!-- ========== DATA FLOW PATHWAYS ========== -->
+                <!-- Inputs → Risk Gates -->
+                <path class="neural-path data-flow" d="M250,60 Q250,90 250,108"/>
+                <path class="neural-path data-flow" d="M390,110 Q370,145 350,168"/>
+                <path class="neural-path data-flow" d="M440,250 Q410,275 392,300"/>
+                <path class="neural-path data-flow" d="M390,400 Q345,390 312,380"/>
+                <path class="neural-path data-flow" d="M250,440 Q215,405 192,350"/>
+                <path class="neural-path data-flow" d="M110,390 Q120,305 130,232"/>
+                <path class="neural-path data-flow" d="M60,250 Q95,235 118,220"/>
+                <path class="neural-path data-flow" d="M110,110 Q180,115 238,120"/>
+
+                <!-- Risk Gates → Strategy -->
+                <path class="neural-path risk-flow" d="M250,132 Q250,156 250,172"/>
+                <path class="neural-path risk-flow" d="M340,185 Q320,202 308,215"/>
+                <path class="neural-path risk-flow" d="M368,295 Q335,288 308,280"/>
+                <path class="neural-path risk-flow" d="M290,370 Q270,345 255,328"/>
+                <path class="neural-path risk-flow" d="M175,340 Q188,310 197,288"/>
+                <path class="neural-path risk-flow" d="M142,215 Q170,218 192,220"/>
+
+                <!-- Strategy → Core (Decision) -->
+                <path class="neural-path decision-flow" d="M250,188 L250,235"/>
+                <path class="neural-path decision-flow" d="M292,225 L258,245"/>
+                <path class="neural-path decision-flow" d="M292,275 L258,255"/>
+                <path class="neural-path decision-flow" d="M250,312 L250,265"/>
+                <path class="neural-path decision-flow" d="M208,275 L242,255"/>
+                <path class="neural-path decision-flow" d="M208,225 L242,245"/>
+            </svg>
+
+            <!-- Confidence Ring -->
+            <div class="confidence-ring" id="confidenceRing"></div>
+
+            <!-- Processing Ring -->
+            <div class="processing-ring"></div>
+
+            <!-- Floating Data Points -->
+            <div class="data-point" style="animation-delay: 0s;"></div>
+            <div class="data-point" style="animation-delay: 2.5s;"></div>
+            <div class="data-point" style="animation-delay: 5s;"></div>
+            <div class="data-point" style="animation-delay: 7.5s;"></div>
+
+            <!-- Core Hexagon -->
+            <div class="core-hex">
+                <div class="hex-outer"><div class="hex-shape"></div></div>
+                <div class="hex-inner"><div class="hex-shape"></div></div>
+                <div class="hex-core"><div class="hex-shape"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Synapse Layer -->
+    <div class="synapse-layer" id="synapseLayer"></div>
+
+    <!-- Left Thought Stream - Market Data -->
+    <div class="thought-stream left" id="thoughtsLeft">
+        <div class="thought-bubble">
+            <div class="label">INITIALIZING</div>
+            Connecting to Truth Engine...
+        </div>
+    </div>
+
+    <!-- Right Thought Stream - Decisions -->
+    <div class="thought-stream right" id="thoughtsRight">
+        <div class="thought-bubble">
+            <div class="label">SYSTEM</div>
+            Awaiting live data...
+        </div>
+    </div>
+
+    <!-- Risk Gates Display -->
+    <div class="risk-gates" id="riskGates">
+        <div class="risk-gate active">
+            <div class="gate-indicator"></div>
+            <span class="gate-label">POSITION_SIZE</span>
+        </div>
+        <div class="risk-gate active">
+            <div class="gate-indicator"></div>
+            <span class="gate-label">MAX_DRAWDOWN</span>
+        </div>
+        <div class="risk-gate active">
+            <div class="gate-indicator"></div>
+            <span class="gate-label">DAILY_LOSS</span>
+        </div>
+        <div class="risk-gate active">
+            <div class="gate-indicator"></div>
+            <span class="gate-label">CORRELATION</span>
+        </div>
+        <div class="risk-gate active">
+            <div class="gate-indicator"></div>
+            <span class="gate-label">VOLATILITY</span>
+        </div>
+        <div class="risk-gate active">
+            <div class="gate-indicator"></div>
+            <span class="gate-label">LIQUIDITY</span>
+        </div>
+        <div class="risk-gate active">
+            <div class="gate-indicator"></div>
+            <span class="gate-label">EXPOSURE</span>
+        </div>
+        <div class="risk-gate active">
+            <div class="gate-indicator"></div>
+            <span class="gate-label">TIME_FILTER</span>
+        </div>
+        <div class="risk-gate active">
+            <div class="gate-indicator"></div>
+            <span class="gate-label">TREND_ALIGN</span>
+        </div>
+        <div class="risk-gate active">
+            <div class="gate-indicator"></div>
+            <span class="gate-label">FINAL_GATE</span>
+        </div>
+    </div>
+
+    <!-- Signal Flow - Real-time signal values -->
+    <div class="signal-flow" id="signalFlow">
+        <div class="signal-item">
+            <div>
+                <div class="signal-type">STATUS</div>
+                <div class="signal-value" style="color: var(--neural-cyan)">LOADING...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Swipeable Panels -->
+    <div class="panel-dots">
+        <div class="panel-dot active" data-panel="0"></div>
+        <div class="panel-dot" data-panel="1"></div>
+        <div class="panel-dot" data-panel="2"></div>
+    </div>
+
+    <div class="mobile-panels" id="mobilePanels">
+        <!-- Panel 1: Metrics -->
+        <div class="mobile-panel" data-panel="0">
+            <div class="panel-title">Performance</div>
+            <div class="mobile-metrics">
+                <div class="mobile-metric">
+                    <span class="mobile-metric-label">Win Rate</span>
+                    <span class="mobile-metric-value neutral" id="mobileWinRate">--%</span>
+                </div>
+                <div class="mobile-metric">
+                    <span class="mobile-metric-label">Record</span>
+                    <span class="mobile-metric-value neutral" id="mobileRecord">0W/0L</span>
+                </div>
+                <div class="mobile-metric">
+                    <span class="mobile-metric-label">P&L</span>
+                    <span class="mobile-metric-value neutral" id="mobilePnl">--</span>
+                </div>
+                <div class="mobile-metric">
+                    <span class="mobile-metric-label">Trades</span>
+                    <span class="mobile-metric-value neutral" id="mobileTrades">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel 2: Thoughts -->
+        <div class="mobile-panel" data-panel="1">
+            <div class="panel-title">Consciousness Stream</div>
+            <div class="mobile-thoughts" id="mobileThoughts">
+                <div class="mobile-thought">Initializing neural pathways...</div>
+            </div>
+        </div>
+
+        <!-- Panel 3: Decision -->
+        <div class="mobile-panel" data-panel="2">
+            <div class="panel-title">Current Decision</div>
+            <div class="mobile-decision">
+                <div class="mobile-decision-result hold" id="mobileDecision">ANALYZING</div>
+                <div class="mobile-decision-reason" id="mobileReason">Awaiting market data...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Decision Panel - Real metrics from Truth Engine (Desktop) -->
+    <!-- Position Health Panel -->
+    <div class="position-health-panel" id="positionHealthPanel" style="display: none;">
+        <div class="position-header">
+            <span class="position-symbol" id="posSymbol">--</span>
+            <span class="position-pnl" id="posPnl">--</span>
+        </div>
+        <div class="position-details">
+            <div class="position-row">
+                <span class="pos-label">Entry</span>
+                <span class="pos-value" id="posEntry">--</span>
+            </div>
+            <div class="position-row">
+                <span class="pos-label">Current</span>
+                <span class="pos-value" id="posCurrent">--</span>
+            </div>
+            <div class="position-row">
+                <span class="pos-label">Chandelier</span>
+                <span class="pos-value stop-value" id="posChandelier">--</span>
+            </div>
+            <div class="position-row">
+                <span class="pos-label">Hard Stop</span>
+                <span class="pos-value stop-value" id="posHardStop">--</span>
+            </div>
+        </div>
+        <div class="health-bar-container">
+            <div class="health-bar-label">Distance to Stop</div>
+            <div class="health-bar">
+                <div class="health-bar-fill" id="healthBarFill"></div>
+                <div class="health-bar-marker chandelier" id="chandelierMarker"></div>
+                <div class="health-bar-marker hardstop" id="hardstopMarker"></div>
+            </div>
+            <div class="health-bar-legend">
+                <span class="legend-safe">SAFE</span>
+                <span class="legend-danger">STOP</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="decision-panel">
+        <div class="decision-metric">
+            <span class="metric-label">Win Rate</span>
+            <span class="metric-value neutral" id="winRate">--%</span>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 0%"></div>
+            </div>
+        </div>
+        <div class="decision-metric">
+            <span class="metric-label">Record</span>
+            <span class="metric-value neutral" id="riskReward">0W / 0L</span>
+        </div>
+        <div class="decision-metric">
+            <span class="metric-label">Positions</span>
+            <span class="metric-value neutral" id="exposure">0 pos</span>
+        </div>
+        <div class="decision-metric">
+            <span class="metric-label">Total Trades</span>
+            <span class="metric-value neutral" id="decisions">0</span>
+        </div>
+        <div class="decision-metric">
+            <span class="metric-label">P&L</span>
+            <span class="metric-value neutral" id="lastTrade">--</span>
+        </div>
+    </div>
+
+    <script>
+        // Particle System
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.5 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.3;
+                this.speedY = (Math.random() - 0.5) * 0.3;
+                this.opacity = Math.random() * 0.5 + 0.1;
+                this.hue = Math.random() > 0.5 ? 180 : 280; // Cyan or Purple
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                // Attract to center
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
+                const dx = centerX - this.x;
+                const dy = centerY - this.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist > 300) {
+                    this.speedX += dx * 0.00001;
+                    this.speedY += dy * 0.00001;
+                }
+
+                if (this.x < 0 || this.x > canvas.width ||
+                    this.y < 0 || this.y > canvas.height) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `hsla(${this.hue}, 100%, 70%, ${this.opacity})`;
+                ctx.fill();
+            }
+        }
+
+        // Reduced particle count for cleaner look
+        const particles = Array.from({ length: 80 }, () => new Particle());
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            // Draw connections
+            particles.forEach((p1, i) => {
+                particles.slice(i + 1).forEach(p2 => {
+                    const dx = p1.x - p2.x;
+                    const dy = p1.y - p2.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 80) {
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = `rgba(0, 245, 255, ${0.1 * (1 - dist / 80)})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                });
+            });
+
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        // Timestamp update
+        function updateTimestamp() {
+            const now = new Date();
+            document.getElementById('timestamp').textContent =
+                now.toLocaleTimeString('en-US', { hour12: false });
+        }
+        setInterval(updateTimestamp, 1000);
+        updateTimestamp();
+
+        // Simulate synapse firing
+        function fireSynapse() {
+            const layer = document.getElementById('synapseLayer');
+            const synapse = document.createElement('div');
+            synapse.className = 'synapse-line';
+
+            const startX = Math.random() * window.innerWidth;
+            const startY = Math.random() * window.innerHeight;
+            const angle = Math.random() * 360;
+            const length = 50 + Math.random() * 150;
+
+            synapse.style.left = startX + 'px';
+            synapse.style.top = startY + 'px';
+            synapse.style.width = length + 'px';
+            synapse.style.transform = `rotate(${angle}deg)`;
+
+            layer.appendChild(synapse);
+
+            setTimeout(() => synapse.remove(), 2000);
+        }
+        // Reduced frequency for cleaner look
+        setInterval(fireSynapse, 800);
+
+        // Neural nodes and paths - now DATA-DRIVEN, not random
+        const allNodes = document.querySelectorAll('.neural-node');
+        const allPaths = document.querySelectorAll('.neural-path');
+        const dataInputNodes = document.querySelectorAll('.neural-node.data-input');
+        const riskGateNodes = document.querySelectorAll('.neural-node.risk-gate-node');
+        const strategyNodes = document.querySelectorAll('.neural-node.strategy-node');
+        const dataFlowPaths = document.querySelectorAll('.neural-path.data-flow');
+        const riskFlowPaths = document.querySelectorAll('.neural-path.risk-flow');
+        const decisionFlowPaths = document.querySelectorAll('.neural-path.decision-flow');
+
+        // Activate a specific node by ID
+        function activateNode(nodeId, duration = 1500) {
+            const node = document.getElementById(nodeId);
+            if (node) {
+                node.classList.add('active');
+                setTimeout(() => node.classList.remove('active'), duration);
+            }
+        }
+
+        // Activate risk gate node with pass/fail state
+        function activateRiskNode(nodeId, passed, duration = 2000) {
+            const node = document.getElementById(nodeId);
+            if (node) {
+                node.classList.remove('active', 'blocked');
+                node.classList.add(passed ? 'active' : 'blocked');
+                setTimeout(() => node.classList.remove('active', 'blocked'), duration);
+            }
+        }
+
+        // Activate paths of a type with staggered animation
+        function activatePaths(pathClass, stagger = 100, duration = 2000) {
+            const paths = document.querySelectorAll(`.neural-path.${pathClass}`);
+            paths.forEach((path, i) => {
+                setTimeout(() => {
+                    path.classList.add('active');
+                    setTimeout(() => path.classList.remove('active'), duration);
+                }, i * stagger);
+            });
+        }
+
+        // Flow data through the neural network (data → risk → decision)
+        function triggerDataFlow(dataType) {
+            // Phase 1: Activate data input node (outer ring)
+            activateNode(`node-${dataType}`, 1500);
+
+            // Phase 2: Flow through data paths (after delay)
+            setTimeout(() => activatePaths('data-flow', 80, 1500), 300);
+
+            // Phase 3: Pulse risk gates (they process data)
+            setTimeout(() => {
+                riskGateNodes.forEach((node, i) => {
+                    setTimeout(() => {
+                        node.classList.add('active');
+                        setTimeout(() => node.classList.remove('active'), 800);
+                    }, i * 100);
+                });
+            }, 800);
+
+            // Phase 4: Flow through risk paths
+            setTimeout(() => activatePaths('risk-flow', 60, 1200), 1200);
+
+            // Phase 5: Activate strategy nodes
+            setTimeout(() => {
+                strategyNodes.forEach((node, i) => {
+                    setTimeout(() => {
+                        node.classList.add('active');
+                        setTimeout(() => node.classList.remove('active'), 600);
+                    }, i * 80);
+                });
+            }, 1600);
+
+            // Phase 6: Decision flow to core
+            setTimeout(() => activatePaths('decision-flow', 50, 1000), 1800);
+        }
+
+        // Process real risk checks and visualize on neural network
+        function visualizeRiskChecks(riskChecks) {
+            if (!riskChecks || Object.keys(riskChecks).length === 0) return;
+
+            const riskNodeMap = {
+                'position_size': 'node-risk-size',
+                'size': 'node-risk-size',
+                'max_drawdown': 'node-risk-dd',
+                'drawdown': 'node-risk-dd',
+                'dd': 'node-risk-dd',
+                'daily_loss': 'node-risk-dd',
+                'volatility': 'node-risk-vol',
+                'vol': 'node-risk-vol',
+                'exposure': 'node-risk-exp',
+                'exp': 'node-risk-exp',
+                'time_filter': 'node-risk-time',
+                'time': 'node-risk-time',
+                'final_gate': 'node-risk-final',
+                'gate': 'node-risk-final',
+                'all_passed': 'node-risk-final'
+            };
+
+            let delay = 0;
+            Object.entries(riskChecks).forEach(([key, value]) => {
+                const nodeId = riskNodeMap[key.toLowerCase()] || riskNodeMap[key.toLowerCase().replace(/_/g, '')];
+                if (nodeId) {
+                    setTimeout(() => {
+                        const passed = value === true || value === 'passed' || value === 'ok';
+                        activateRiskNode(nodeId, passed, 2500);
+                    }, delay);
+                    delay += 150;
+                }
+            });
+        }
+
+        // Visualize signal values on data input nodes
+        function visualizeSignalData(signalValues) {
+            if (!signalValues) return;
+
+            // Map signal keys to node IDs
+            if (signalValues.price || signalValues.current_price) {
+                activateNode('node-price', 2000);
+            }
+            if (signalValues.volume || signalValues.vol) {
+                setTimeout(() => activateNode('node-volume', 1500), 100);
+            }
+            if (signalValues.fast_ema || signalValues.ema_fast || signalValues.ema_12) {
+                setTimeout(() => activateNode('node-ema-fast', 1500), 200);
+            }
+            if (signalValues.slow_ema || signalValues.ema_slow || signalValues.ema_26) {
+                setTimeout(() => activateNode('node-ema-slow', 1500), 300);
+            }
+            if (signalValues.atr) {
+                setTimeout(() => activateNode('node-atr', 1500), 400);
+            }
+            if (signalValues.donchian || signalValues.upper_band || signalValues.lower_band) {
+                setTimeout(() => activateNode('node-donchian', 1500), 500);
+            }
+            if (signalValues.sma_200 || signalValues.sma) {
+                setTimeout(() => activateNode('node-sma', 1500), 600);
+            }
+            if (signalValues.regime || signalValues.trend || signalValues.volatility_regime) {
+                setTimeout(() => activateNode('node-regime', 1500), 700);
+            }
+
+            // Trigger full data flow animation
+            setTimeout(() => {
+                activatePaths('data-flow', 80, 1500);
+            }, 400);
+        }
+
+        // Visualize decision result on strategy nodes
+        function visualizeDecision(result) {
+            if (!result) return;
+
+            const isBuy = result.includes('BUY') || result.includes('LONG') || result.includes('ENTER');
+            const isSell = result.includes('SELL') || result.includes('SHORT') || result.includes('EXIT');
+            const isHold = result.includes('HOLD') || result.includes('SKIP') || result.includes('WAIT');
+
+            // Light up strategy nodes based on decision
+            if (isBuy) {
+                activateNode('node-signal', 2000);
+                setTimeout(() => activateNode('node-entry', 2000), 150);
+                setTimeout(() => activateNode('node-sizing', 2000), 300);
+                setTimeout(() => activateNode('node-stop', 2000), 450);
+                setTimeout(() => activateNode('node-target', 2000), 600);
+            } else if (isSell) {
+                activateNode('node-signal', 2000);
+                setTimeout(() => activateNode('node-exit', 2000), 150);
+            } else if (isHold) {
+                activateNode('node-signal', 1500);
+            }
+
+            // Flow to core
+            setTimeout(() => activatePaths('decision-flow', 50, 1000), 500);
+        }
+
+        // Gentle ambient pulse (much slower, subtle background activity)
+        function ambientPulse() {
+            // Randomly pick ONE node every 3 seconds for subtle life
+            const allNodesArray = Array.from(allNodes);
+            const randomNode = allNodesArray[Math.floor(Math.random() * allNodesArray.length)];
+            randomNode.classList.add('active');
+            setTimeout(() => randomNode.classList.remove('active'), 800);
+        }
+        setInterval(ambientPulse, 3000);
+
+        // Ambient path pulse (very subtle)
+        function ambientPathPulse() {
+            const allPathsArray = Array.from(allPaths);
+            const randomPath = allPathsArray[Math.floor(Math.random() * allPathsArray.length)];
+            randomPath.classList.add('active');
+            setTimeout(() => randomPath.classList.remove('active'), 1500);
+        }
+        setInterval(ambientPathPulse, 4000);
+
+        // Activate shield rings on risk checks (slower, more subtle)
+        const shields = document.querySelectorAll('.shield-ring');
+        function pulseShield() {
+            const shield = shields[Math.floor(Math.random() * shields.length)];
+            shield.classList.add('active');
+            setTimeout(() => shield.classList.remove('active'), 600);
+        }
+        setInterval(pulseShield, 2000);
+
+        // =====================================================
+        // CONSCIOUSNESS SYSTEM - Show what Argus is thinking
+        // =====================================================
+
+        const consciousnessTerminal = document.getElementById('consciousnessTerminal');
+        const regimeIndicator = document.getElementById('regimeIndicator');
+        const livePriceEl = document.getElementById('livePrice');
+        const verdictOverlay = document.getElementById('verdictOverlay');
+        const verdictText = document.getElementById('verdictText');
+        const verdictReason = document.getElementById('verdictReason');
+        const confidenceRing = document.getElementById('confidenceRing');
+
+        let lastPrice = null;
+        let priceDirection = 'neutral';
+
+        // Add a thought to the consciousness stream
+        function addThoughtLine(text, type = '') {
+            const line = document.createElement('div');
+            line.className = `thought-line ${type}`;
+            line.innerHTML = `<span class="prefix">${type === 'reasoning' ? '↳' : '>'}</span> ${text}`;
+            consciousnessTerminal.appendChild(line);
+
+            // Keep max 8 lines
+            while (consciousnessTerminal.children.length > 8) {
+                consciousnessTerminal.removeChild(consciousnessTerminal.children[0]);
+            }
+
+            // Auto-scroll
+            consciousnessTerminal.scrollTop = consciousnessTerminal.scrollHeight;
+        }
+
+        // Update market regime indicator
+        function updateRegime(price, trend) {
+            if (!price) return;
+
+            // Update price display
+            livePriceEl.textContent = '$' + price.toLocaleString(undefined, {maximumFractionDigits: 0});
+
+            // Determine direction
+            if (lastPrice !== null) {
+                if (price > lastPrice * 1.0001) {
+                    priceDirection = 'bullish';
+                } else if (price < lastPrice * 0.9999) {
+                    priceDirection = 'bearish';
+                } else {
+                    priceDirection = 'neutral';
+                }
+            }
+            lastPrice = price;
+
+            // Use trend from signal if available, otherwise use price direction
+            const regime = trend || priceDirection;
+
+            regimeIndicator.classList.remove('bullish', 'bearish', 'neutral');
+            regimeIndicator.classList.add(regime);
+
+            const label = regimeIndicator.querySelector('.regime-label');
+            if (regime === 'bullish') {
+                label.textContent = 'BULLISH';
+            } else if (regime === 'bearish') {
+                label.textContent = 'BEARISH';
+            } else {
+                label.textContent = 'RANGING';
+            }
+        }
+
+        // Show verdict overlay
+        function showVerdict(decision, reason) {
+            const isBuy = decision.includes('BUY') || decision.includes('LONG') || decision.includes('ENTER');
+            const isSell = decision.includes('SELL') || decision.includes('SHORT') || decision.includes('EXIT');
+
+            verdictText.textContent = decision;
+            verdictReason.textContent = reason || '';
+
+            verdictOverlay.classList.remove('buy', 'sell', 'hold');
+            if (isBuy) {
+                verdictOverlay.classList.add('buy');
+            } else if (isSell) {
+                verdictOverlay.classList.add('sell');
+            } else {
+                verdictOverlay.classList.add('hold');
+            }
+
+            verdictOverlay.classList.add('show');
+
+            // Hide after 3 seconds
+            setTimeout(() => {
+                verdictOverlay.classList.remove('show');
+            }, 3000);
+        }
+
+        // Set confidence level (affects ring animation)
+        function setConfidence(level) {
+            if (level === 'high') {
+                confidenceRing.classList.add('strong');
+            } else {
+                confidenceRing.classList.remove('strong');
+            }
+        }
+
+        // Generate reasoning thoughts from decision data
+        function generateThoughts(decision) {
+            const signalValues = decision.signal_values || {};
+            const riskChecks = decision.risk_checks || {};
+            const result = decision.result || '';
+            const reason = decision.result_reason || '';
+
+            // Clear old thoughts for new decision cycle
+            addThoughtLine(`Analyzing ${decision.symbol}...`, '');
+
+            // Price analysis
+            const price = signalValues.price || signalValues.current_price;
+            if (price) {
+                addThoughtLine(`Price: $${price.toLocaleString()}`, 'reasoning');
+            }
+
+            // EMA analysis
+            const emaFast = signalValues.fast_ema || signalValues.ema_fast;
+            const emaSlow = signalValues.slow_ema || signalValues.ema_slow;
+            if (emaFast && emaSlow) {
+                const crossState = emaFast > emaSlow ? 'above' : 'below';
+                addThoughtLine(`EMA₁₂ ${crossState} EMA₂₆`, 'reasoning');
+            }
+
+            // ATR/Volatility
+            const atr = signalValues.atr?.atr_14 || signalValues.atr;
+            if (atr && typeof atr === 'number') {
+                const volLevel = atr > 2000 ? 'HIGH' : atr > 1000 ? 'MODERATE' : 'LOW';
+                addThoughtLine(`Volatility: ${volLevel} (ATR: ${atr.toFixed(0)})`, 'reasoning');
+            }
+
+            // Risk check summary
+            const riskPassed = Object.values(riskChecks).filter(v => v === true || v === 'passed').length;
+            const riskTotal = Object.keys(riskChecks).length;
+            if (riskTotal > 0) {
+                const riskStatus = riskPassed === riskTotal ? 'ALL CLEAR' : `${riskPassed}/${riskTotal} PASSED`;
+                addThoughtLine(`Risk gates: ${riskStatus}`, riskPassed === riskTotal ? 'conclusion' : 'alert');
+            }
+
+            // Final decision
+            setTimeout(() => {
+                const isBuy = result.includes('BUY') || result.includes('LONG');
+                const isSell = result.includes('SELL') || result.includes('SHORT');
+                const type = isBuy ? 'conclusion' : isSell ? 'danger' : 'alert';
+                addThoughtLine(`Decision: ${result}`, type);
+
+                if (reason) {
+                    addThoughtLine(reason, 'reasoning');
+                }
+            }, 500);
+        }
+
+        // =====================================================
+        // REAL DATA CONNECTION - Truth Engine API
+        // =====================================================
+
+        const API_KEY = localStorage.getItem('argus_api_key') || '';
+        let lastDecisionId = null;
+        let connectionStatus = 'connecting';
+
+        // Update connection status indicator
+        function setConnectionStatus(status) {
+            connectionStatus = status;
+            const statusDot = document.querySelector('.status-dot.processing');
+            const statusText = statusDot?.nextElementSibling;
+
+            if (status === 'connected') {
+                statusDot.style.background = 'var(--signal-green)';
+                statusDot.style.boxShadow = '0 0 10px var(--signal-green), 0 0 20px var(--signal-green)';
+                if (statusText) statusText.textContent = 'NEURAL CORE LIVE';
+            } else if (status === 'error') {
+                statusDot.style.background = 'var(--alert-red)';
+                statusDot.style.boxShadow = '0 0 10px var(--alert-red), 0 0 20px var(--alert-red)';
+                if (statusText) statusText.textContent = 'CONNECTION LOST';
+            } else {
+                statusDot.style.background = 'var(--warning-amber)';
+                statusDot.style.boxShadow = '0 0 10px var(--warning-amber), 0 0 20px var(--warning-amber)';
+                if (statusText) statusText.textContent = 'CONNECTING...';
+            }
+        }
+
+        // Add thought bubble with real data
+        function addThought(side, type, label, text) {
+            const container = document.getElementById(side === 'left' ? 'thoughtsLeft' : 'thoughtsRight');
+
+            const bubble = document.createElement('div');
+            bubble.className = `thought-bubble ${type}`;
+            bubble.innerHTML = `<div class="label">${label}</div>${text}`;
+
+            container.appendChild(bubble);
+
+            // Keep max 5 thoughts per side
+            while (container.children.length > 5) {
+                container.removeChild(container.children[0]);
+            }
+
+            // Fire a few synapses for visual feedback on new thoughts
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => fireSynapse(), i * 40);
+            }
+        }
+
+        // Trigger visual neural activity on new data (now uses meaningful activations)
+        function triggerNeuralBurst(signalValues, riskChecks, result) {
+            // Fire synapses for visual effect
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => fireSynapse(), i * 50);
+            }
+
+            // Use data-driven visualization if we have data
+            if (signalValues && Object.keys(signalValues).length > 0) {
+                visualizeSignalData(signalValues);
+            }
+
+            if (riskChecks && Object.keys(riskChecks).length > 0) {
+                setTimeout(() => visualizeRiskChecks(riskChecks), 500);
+            }
+
+            if (result) {
+                setTimeout(() => visualizeDecision(result), 1000);
+            }
+        }
+
+        // Update risk gates from real risk_checks data
+        function updateRiskGates(riskChecks) {
+            const gatesContainer = document.getElementById('riskGates');
+            gatesContainer.innerHTML = '';
+
+            if (!riskChecks || Object.keys(riskChecks).length === 0) {
+                // Show default gates if no data
+                const defaultGates = ['POSITION_SIZE', 'DRAWDOWN', 'DAILY_LOSS', 'VOLATILITY', 'EXPOSURE'];
+                defaultGates.forEach(gate => {
+                    const gateEl = document.createElement('div');
+                    gateEl.className = 'risk-gate';
+                    gateEl.innerHTML = `<div class="gate-indicator"></div><span class="gate-label">${gate}</span>`;
+                    gatesContainer.appendChild(gateEl);
+                });
+                return;
+            }
+
+            // Create gates from actual risk checks
+            Object.entries(riskChecks).forEach(([key, value], index) => {
+                const passed = value === true || value === 'passed' || value === 'ok';
+                const gateEl = document.createElement('div');
+                gateEl.className = `risk-gate ${passed ? 'active' : 'blocked'}`;
+                gateEl.innerHTML = `<div class="gate-indicator"></div><span class="gate-label">${key.toUpperCase()}</span>`;
+                gatesContainer.appendChild(gateEl);
+
+                // Animate gate activation
+                setTimeout(() => {
+                    // Pulse corresponding shield ring
+                    if (shields[index]) {
+                        shields[index].classList.add('active');
+                        setTimeout(() => shields[index].classList.remove('active'), 500);
+                    }
+                }, index * 100);
+            });
+        }
+
+        // Update signal flow from real signal_values
+        function updateSignalFlow(signalValues, result) {
+            const signalFlow = document.getElementById('signalFlow');
+            signalFlow.innerHTML = '';
+
+            if (!signalValues || Object.keys(signalValues).length === 0) return;
+
+            // Format and display signal values
+            const displayOrder = ['fast_ema', 'slow_ema', 'ema_fast', 'ema_slow', 'atr', 'rsi', 'price', 'signal'];
+            const displayed = new Set();
+
+            // First show ordered keys
+            displayOrder.forEach(key => {
+                if (signalValues[key] !== undefined && !displayed.has(key)) {
+                    displayed.add(key);
+                    addSignalItem(key, signalValues[key]);
+                }
+            });
+
+            // Then show remaining keys
+            Object.entries(signalValues).forEach(([key, value]) => {
+                if (!displayed.has(key) && typeof value !== 'object') {
+                    addSignalItem(key, value);
+                }
+            });
+
+            // Add result as final signal
+            if (result) {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'signal-item';
+                const color = result.includes('BUY') || result.includes('LONG') ? 'var(--signal-green)' :
+                             result.includes('SELL') || result.includes('SHORT') ? 'var(--alert-red)' :
+                             'var(--neural-cyan)';
+                resultItem.innerHTML = `<div><div class="signal-type">DECISION</div><div class="signal-value" style="color: ${color}">${result}</div></div>`;
+                signalFlow.appendChild(resultItem);
+            }
+        }
+
+        function addSignalItem(key, value) {
+            const signalFlow = document.getElementById('signalFlow');
+            const item = document.createElement('div');
+            item.className = 'signal-item';
+
+            let displayValue = value;
+            let color = 'var(--neural-cyan)';
+
+            // Handle nested objects (like atr.atr_14)
+            if (typeof value === 'object' && value !== null) {
+                // Try to extract a meaningful number from the object
+                const numericKey = Object.keys(value).find(k => typeof value[k] === 'number');
+                if (numericKey) {
+                    displayValue = value[numericKey].toLocaleString(undefined, {maximumFractionDigits: 2});
+                } else {
+                    return; // Skip complex objects
+                }
+            } else if (typeof value === 'number') {
+                displayValue = value.toLocaleString(undefined, {maximumFractionDigits: 2});
+            }
+
+            if (key.includes('atr')) color = 'var(--warning-amber)';
+            if (key.includes('ema') || key.includes('EMA')) color = key.includes('slow') ? 'var(--synapse-purple)' : 'var(--neural-cyan)';
+            if (key.includes('price')) color = 'var(--signal-green)';
+
+            item.innerHTML = `<div><div class="signal-type">${key.replace(/_/g, ' ').toUpperCase()}</div><div class="signal-value" style="color: ${color}">${displayValue}</div></div>`;
+            signalFlow.appendChild(item);
+        }
+
+        // Update metrics from real scoreboard data
+        function updateMetricsFromData(data) {
+            const scoreboard = data.scoreboard || {};
+            const balance = data.balance || {};
+
+            // Win Rate
+            const winRate = scoreboard.win_rate || 0;
+            const winRateEl = document.getElementById('winRate');
+            winRateEl.textContent = winRate.toFixed(1) + '%';
+            winRateEl.className = 'metric-value ' + (winRate >= 50 ? 'positive' : winRate >= 40 ? 'neutral' : 'negative');
+
+            // Update win rate bar
+            const winRateBar = winRateEl.parentElement.querySelector('.metric-bar-fill');
+            if (winRateBar) winRateBar.style.width = winRate + '%';
+
+            // W/L as Risk/Reward proxy
+            const wins = scoreboard.wins || 0;
+            const losses = scoreboard.losses || 0;
+            document.getElementById('riskReward').textContent = `${wins}W / ${losses}L`;
+
+            // Exposure (positions)
+            const positions = scoreboard.active_positions || balance.position_count || 0;
+            document.getElementById('exposure').textContent = positions + ' pos';
+
+            // Total decisions
+            const totalTrades = scoreboard.total_closed || 0;
+            document.getElementById('decisions').textContent = totalTrades;
+
+            // P&L
+            const pnl = balance.pnl_pct || scoreboard.realized_pnl || 0;
+            const lastTradeEl = document.getElementById('lastTrade');
+            const pnlValue = typeof pnl === 'number' ? pnl : 0;
+            lastTradeEl.textContent = (pnlValue >= 0 ? '+' : '') + pnlValue.toFixed(2) + '%';
+            lastTradeEl.className = 'metric-value ' + (pnlValue >= 0 ? 'positive' : 'negative');
+
+            // Update sentiment orb based on drawdown state
+            const sentimentOrb = document.getElementById('sentimentOrb');
+            const ddState = balance.dd_state || 'normal';
+            if (ddState === 'warning' || ddState === 'critical' || ddState === 'halt') {
+                sentimentOrb.classList.add('bearish');
+            } else {
+                sentimentOrb.classList.remove('bearish');
+            }
+
+            // Update Position Health Panel
+            updatePositionHealth(scoreboard);
+        }
+
+        // Update position health bar with stop distances
+        function updatePositionHealth(scoreboard) {
+            const panel = document.getElementById('positionHealthPanel');
+            const positions = scoreboard.positions || [];
+
+            if (positions.length === 0) {
+                panel.style.display = 'none';
+                return;
+            }
+
+            // Show first position (primary position)
+            const pos = positions[0];
+            panel.style.display = 'block';
+
+            // Symbol
+            document.getElementById('posSymbol').textContent = pos.symbol || '--';
+
+            // P&L
+            const pnlEl = document.getElementById('posPnl');
+            const pnl = pos.unrealized_pnl || 0;
+            const pnlPct = pos.unrealized_pnl_pct || 0;
+            pnlEl.textContent = `${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)} (${pnlPct.toFixed(1)}%)`;
+            pnlEl.className = 'position-pnl ' + (pnl >= 0 ? 'positive' : 'negative');
+
+            // Price details
+            document.getElementById('posEntry').textContent = `$${(pos.entry_price || 0).toLocaleString()}`;
+            document.getElementById('posCurrent').textContent = `$${(pos.current_price || 0).toLocaleString()}`;
+
+            // Stop levels
+            const chandelier = pos.chandelier_stop;
+            const hardStop = pos.stop_loss;
+            document.getElementById('posChandelier').textContent = chandelier ? `$${chandelier.toLocaleString()}` : '--';
+            document.getElementById('posHardStop').textContent = hardStop ? `$${hardStop.toLocaleString()}` : '--';
+
+            // Health bar visualization
+            const entry = pos.entry_price || 0;
+            const current = pos.current_price || 0;
+            const effectiveStop = chandelier || hardStop || (entry * 0.95);
+
+            if (entry > 0 && effectiveStop > 0) {
+                // Calculate position on health bar (0% = at stop, 100% = at entry or above)
+                const range = entry - effectiveStop;
+                const distanceFromStop = current - effectiveStop;
+                const healthPct = Math.max(0, Math.min(100, (distanceFromStop / range) * 100));
+
+                // Fill bar from right (dark area shows safe zone consumed)
+                document.getElementById('healthBarFill').style.width = (100 - healthPct) + '%';
+
+                // Position markers
+                if (chandelier) {
+                    const chandelierPct = ((chandelier - effectiveStop) / range) * 100;
+                    document.getElementById('chandelierMarker').style.left = Math.max(0, Math.min(100, chandelierPct)) + '%';
+                    document.getElementById('chandelierMarker').style.display = 'block';
+                } else {
+                    document.getElementById('chandelierMarker').style.display = 'none';
+                }
+
+                if (hardStop && hardStop !== chandelier) {
+                    const hardStopPct = ((hardStop - effectiveStop) / range) * 100;
+                    document.getElementById('hardstopMarker').style.left = Math.max(0, Math.min(100, hardStopPct)) + '%';
+                    document.getElementById('hardstopMarker').style.display = 'block';
+                } else {
+                    document.getElementById('hardstopMarker').style.display = 'none';
+                }
+            }
+        }
+
+        // Process incoming decision data
+        function processDecision(decision) {
+            if (!decision || decision.decision_id === lastDecisionId) return;
+            lastDecisionId = decision.decision_id;
+
+            const signalValues = decision.signal_values || {};
+            const riskChecks = decision.risk_checks || {};
+            const marketContext = decision.market_context || {};
+
+            // Add market data thoughts (left side)
+            // Handle both old (price) and new (current_price) formats
+            const price = signalValues.current_price || signalValues.price || marketContext.current_price;
+            if (price) {
+                addThought('left', '', 'PRICE', `${decision.symbol}: $${price.toLocaleString()}`);
+            }
+
+            // Professional MTF Strategy - Grade and Alignment
+            if (signalValues.grade) {
+                const gradeType = signalValues.grade === 'A+' || signalValues.grade === 'A' ? 'signal-buy' :
+                                  signalValues.grade === 'B' ? '' : 'risk-alert';
+                addThought('left', gradeType, 'GRADE', `Setup: ${signalValues.grade}`);
+            }
+
+            // Trend Alignment
+            if (signalValues.trend_alignment !== undefined) {
+                const alignType = signalValues.trend_alignment ? 'signal-buy' : '';
+                addThought('left', alignType, 'TREND', signalValues.trend_alignment ? '✓ Aligned' : '✗ Conflicting');
+            }
+
+            // Momentum Alignment
+            if (signalValues.momentum_alignment !== undefined) {
+                const momentumType = signalValues.momentum_alignment ? 'signal-buy' : '';
+                addThought('left', momentumType, 'MOMENTUM', signalValues.momentum_alignment ? '✓ Confirmed' : '✗ Weak');
+            }
+
+            // Volume Confirmation
+            if (signalValues.volume_confirmed !== undefined) {
+                const volType = signalValues.volume_confirmed ? 'signal-buy' : '';
+                addThought('left', volType, 'VOLUME', signalValues.volume_confirmed ? '✓ High' : '✗ Low');
+            }
+
+            // Legacy EMA support (for backwards compatibility)
+            if (signalValues.fast_ema || signalValues.ema_fast) {
+                const ema = signalValues.fast_ema || signalValues.ema_fast;
+                addThought('left', '', 'EMA FAST', `$${ema.toLocaleString(undefined, {maximumFractionDigits: 2})}`);
+            }
+
+            // Handle ATR - can be number or object with atr_14
+            const atrValue = signalValues.atr?.atr_14 || signalValues.atr || signalValues.daily_atr;
+            if (atrValue && typeof atrValue === 'number' && atrValue > 0) {
+                addThought('left', '', 'ATR', `Volatility: ${atrValue.toFixed(2)}`);
+            }
+
+            // Add decision thoughts (right side)
+            const result = decision.result || 'EVALUATING';
+            const resultType = result.includes('BUY') || result.includes('LONG') ? 'signal-buy' :
+                              result.includes('SELL') || result.includes('SHORT') ? 'signal-sell' :
+                              result.includes('SKIP') || result.includes('HOLD') ? '' : 'risk-alert';
+
+            addThought('right', resultType, 'DECISION', result);
+
+            if (decision.result_reason) {
+                addThought('right', resultType.includes('signal') ? resultType : '', 'REASON', decision.result_reason);
+            }
+
+            // Display reasoning array (detailed breakdown)
+            const reasoning = signalValues.reasoning || [];
+            if (reasoning.length > 0) {
+                reasoning.forEach((reason, idx) => {
+                    // Determine type based on content
+                    const reasonType = reason.includes('✓') ? 'signal-buy' :
+                                      reason.includes('✗') ? 'risk-alert' : '';
+                    addThought('right', reasonType, `LOGIC ${idx + 1}`, reason);
+                });
+            }
+
+            // Market regime from risk checks
+            if (riskChecks.regime) {
+                const regimeType = riskChecks.regime.includes('bull') ? 'signal-buy' :
+                                   riskChecks.regime.includes('bear') ? 'signal-sell' : '';
+                addThought('right', regimeType, 'REGIME', riskChecks.regime);
+            }
+
+            // Update risk gates and signal flow
+            updateRiskGates(riskChecks);
+            updateSignalFlow(signalValues, result);
+
+            // *** MEANINGFUL NEURAL VISUALIZATION ***
+            // Trigger the data-driven neural animation
+            triggerNeuralBurst(signalValues, riskChecks, result);
+
+            // *** CONSCIOUSNESS SYSTEM ***
+            // Generate thought stream
+            generateThoughts(decision);
+
+            // Update market regime
+            const trend = signalValues.trend || marketContext.regime || riskChecks.regime;
+            updateRegime(price, trend);
+
+            // Show verdict for actionable decisions
+            if (result.includes('BUY') || result.includes('SELL') || result.includes('LONG') || result.includes('SHORT')) {
+                showVerdict(result, decision.result_reason);
+                setConfidence('high');
+            } else if (signalValues.grade === 'A+' || signalValues.grade === 'A') {
+                setConfidence('high');
+            } else if (signalValues.grade === 'B') {
+                setConfidence('medium');
+            } else {
+                setConfidence('low');
+            }
+        }
+
+        // Connect to SSE stream for real-time data
+        function connectToStream() {
+            setConnectionStatus('connecting');
+
+            const headers = API_KEY ? { 'X-API-Key': API_KEY } : {};
+            const es = new EventSource('/api/stream');
+
+            es.onopen = () => {
+                console.log('🧠 Connected to Truth Engine');
+                setConnectionStatus('connected');
+                addThought('right', '', 'SYSTEM', 'Neural Core connected to Truth Engine');
+            };
+
+            es.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+
+                    // Update metrics from scoreboard/balance
+                    updateMetricsFromData(data);
+
+                    // Process decisions
+                    if (data.decisions && data.decisions.length > 0) {
+                        // Process newest decision
+                        processDecision(data.decisions[0]);
+                    }
+
+                } catch (e) {
+                    console.error('Parse error:', e);
+                }
+            };
+
+            es.onerror = (err) => {
+                console.error('Stream error:', err);
+                setConnectionStatus('error');
+                es.close();
+
+                // Reconnect after 5 seconds
+                setTimeout(connectToStream, 5000);
+            };
+        }
+
+        // Initial connection
+        connectToStream();
+
+        // Background neural activity (slower when real data is flowing)
+        const gates = document.querySelectorAll('.risk-gate');
+
+        console.log('🧠 ARGUS NEXUS Neural Core initialized');
+        console.log('📊 Truth Engine connected');
+        console.log('🛡️ 10-layer risk gate active');
+
+        // =====================================================
+        // MOBILE PANELS SYSTEM
+        // =====================================================
+
+        const mobilePanels = document.getElementById('mobilePanels');
+        const panelDots = document.querySelectorAll('.panel-dot');
+        const mobileThoughts = document.getElementById('mobileThoughts');
+
+        // Update panel indicator dots on scroll
+        if (mobilePanels) {
+            mobilePanels.addEventListener('scroll', () => {
+                const scrollLeft = mobilePanels.scrollLeft;
+                const panelWidth = mobilePanels.offsetWidth;
+                const activeIndex = Math.round(scrollLeft / panelWidth);
+
+                panelDots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+
+        // Add thought to mobile panel
+        function addMobileThought(text, type = '') {
+            if (!mobileThoughts) return;
+
+            const thought = document.createElement('div');
+            thought.className = `mobile-thought ${type}`;
+            thought.textContent = text;
+            mobileThoughts.appendChild(thought);
+
+            // Keep max 10 thoughts
+            while (mobileThoughts.children.length > 10) {
+                mobileThoughts.removeChild(mobileThoughts.children[0]);
+            }
+
+            // Auto-scroll
+            mobileThoughts.scrollTop = mobileThoughts.scrollHeight;
+        }
+
+        // Update mobile metrics
+        function updateMobileMetrics(data) {
+            const scoreboard = data.scoreboard || {};
+            const balance = data.balance || {};
+
+            // Win Rate
+            const winRate = scoreboard.win_rate || 0;
+            const mobileWinRateEl = document.getElementById('mobileWinRate');
+            if (mobileWinRateEl) {
+                mobileWinRateEl.textContent = winRate.toFixed(0) + '%';
+                mobileWinRateEl.className = 'mobile-metric-value ' + (winRate >= 50 ? 'positive' : 'neutral');
+            }
+
+            // Record
+            const wins = scoreboard.wins || 0;
+            const losses = scoreboard.losses || 0;
+            const mobileRecordEl = document.getElementById('mobileRecord');
+            if (mobileRecordEl) {
+                mobileRecordEl.textContent = `${wins}W/${losses}L`;
+            }
+
+            // P&L
+            const pnl = balance.pnl_pct || scoreboard.realized_pnl || 0;
+            const mobilePnlEl = document.getElementById('mobilePnl');
+            if (mobilePnlEl) {
+                const pnlValue = typeof pnl === 'number' ? pnl : 0;
+                mobilePnlEl.textContent = (pnlValue >= 0 ? '+' : '') + pnlValue.toFixed(1) + '%';
+                mobilePnlEl.className = 'mobile-metric-value ' + (pnlValue >= 0 ? 'positive' : 'negative');
+            }
+
+            // Total trades
+            const totalTrades = scoreboard.total_closed || 0;
+            const mobileTradesEl = document.getElementById('mobileTrades');
+            if (mobileTradesEl) {
+                mobileTradesEl.textContent = totalTrades;
+            }
+        }
+
+        // Update mobile decision panel
+        function updateMobileDecision(decision) {
+            const result = decision.result || 'ANALYZING';
+            const reason = decision.result_reason || '';
+
+            const mobileDecisionEl = document.getElementById('mobileDecision');
+            const mobileReasonEl = document.getElementById('mobileReason');
+
+            if (mobileDecisionEl) {
+                mobileDecisionEl.textContent = result;
+                mobileDecisionEl.classList.remove('buy', 'sell', 'hold');
+
+                if (result.includes('BUY') || result.includes('LONG')) {
+                    mobileDecisionEl.classList.add('buy');
+                } else if (result.includes('SELL') || result.includes('SHORT')) {
+                    mobileDecisionEl.classList.add('sell');
+                } else {
+                    mobileDecisionEl.classList.add('hold');
+                }
+            }
+
+            if (mobileReasonEl) {
+                mobileReasonEl.textContent = reason || 'Processing...';
+            }
+        }
+
+        // Hook into existing data flow
+        const originalUpdateMetrics = updateMetricsFromData;
+        updateMetricsFromData = function(data) {
+            originalUpdateMetrics(data);
+            updateMobileMetrics(data);
+        };
+
+        const originalProcessDecision = processDecision;
+        processDecision = function(decision) {
+            originalProcessDecision(decision);
+
+            // Update mobile panels
+            updateMobileDecision(decision);
+
+            // Add thoughts to mobile panel
+            const signalValues = decision.signal_values || {};
+            const price = signalValues.price || signalValues.current_price;
+            if (price) {
+                addMobileThought(`Price: $${price.toLocaleString()}`, '');
+            }
+
+            const result = decision.result || '';
+            const isBuy = result.includes('BUY') || result.includes('LONG');
+            const isSell = result.includes('SELL') || result.includes('SHORT');
+            const type = isBuy ? 'conclusion' : isSell ? 'alert' : 'reasoning';
+            addMobileThought(`→ ${result}`, type);
+        };
+    </script>
+</body>
+</html>
