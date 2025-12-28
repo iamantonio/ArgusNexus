@@ -5,16 +5,16 @@ After=network.target
 
 [Service]
 Type=simple
-User=tony
+User=your_user
 Group=tony
-WorkingDirectory=/home/tony/ArgusNexus-V4-Core
-ExecStart=/home/tony/ArgusNexus-V4-Core/venv/bin/python /home/tony/ArgusNexus-V4-Core/scripts/live_paper_trader.py --interval 1h --capital 500
+WorkingDirectory=/path/to/ArgusNexus
+ExecStart=/path/to/ArgusNexus/venv/bin/python /path/to/ArgusNexus/scripts/live_paper_trader.py --interval 1h --capital 500
 Restart=always
 RestartSec=30
 
 # Environment
 Environment=PYTHONUNBUFFERED=1
-Environment=PYTHONPATH=/home/tony/ArgusNexus-V4-Core
+Environment=PYTHONPATH=/path/to/ArgusNexus
 
 # Logging
 StandardOutput=journal
@@ -25,7 +25,7 @@ SyslogIdentifier=argusnexus-paper
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=/home/tony/ArgusNexus-V4-Core/data
+ReadWritePaths=/path/to/ArgusNexus/data
 
 # Timeouts
 TimeoutStartSec=30

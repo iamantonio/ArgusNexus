@@ -8,7 +8,7 @@
 
 **Tech Stack:** Python 3.12, SQLite, pandas, Coinbase Advanced Trade API, pytest
 
-**Design Reference:** See `/home/tony/ArgusNexus-V4-Core/docs/plans/2025-12-17-validation-infrastructure-design.md` for full design decisions.
+**Design Reference:** See `/path/to/ArgusNexus/docs/plans/2025-12-17-validation-infrastructure-design.md` for full design decisions.
 
 ---
 

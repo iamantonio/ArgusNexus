@@ -12,7 +12,7 @@ Usage:
     python scripts/run_scanner.py --full       # Full market scan
 
 Cron Example (every 4 hours):
-    0 */4 * * * /home/tony/ArgusNexus-V4-Core/venv/bin/python /home/tony/ArgusNexus-V4-Core/scripts/run_scanner.py >> /home/tony/ArgusNexus-V4-Core/logs/scanner.log 2>&1
+    0 */4 * * * /path/to/ArgusNexus/venv/bin/python /path/to/ArgusNexus/scripts/run_scanner.py >> /path/to/ArgusNexus/logs/scanner.log 2>&1
 """
 
 import asyncio

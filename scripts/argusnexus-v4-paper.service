@@ -4,15 +4,15 @@ After=network.target
 
 [Service]
 Type=simple
-User=tony
-WorkingDirectory=/home/tony/ArgusNexus-V4-Core
-ExecStart=/home/tony/ArgusNexus-V4-Core/venv/bin/python /home/tony/ArgusNexus-V4-Core/scripts/live_paper_trader.py --interval 4h --capital 10000
+User=your_user
+WorkingDirectory=/path/to/ArgusNexus
+ExecStart=/path/to/ArgusNexus/venv/bin/python /path/to/ArgusNexus/scripts/live_paper_trader.py --interval 4h --capital 10000
 Restart=always
 RestartSec=30
 
 # Environment
 Environment=PYTHONUNBUFFERED=1
-Environment=PYTHONPATH=/home/tony/ArgusNexus-V4-Core
+Environment=PYTHONPATH=/path/to/ArgusNexus
 
 # Logging
 StandardOutput=journal

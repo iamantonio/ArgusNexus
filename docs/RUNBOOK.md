@@ -249,9 +249,9 @@ After=network.target
 
 [Service]
 Type=simple
-User=tony
-WorkingDirectory=/home/tony/ArgusNexus-V4-Core
-ExecStart=/home/tony/ArgusNexus-V4-Core/venv/bin/python3 scripts/paper_trade_burnin.py
+User=your_user
+WorkingDirectory=/path/to/ArgusNexus
+ExecStart=/path/to/ArgusNexus/venv/bin/python3 scripts/paper_trade_burnin.py
 Restart=always
 RestartSec=60
 StandardOutput=journal
@@ -369,8 +369,8 @@ The dashboard header shows a "Trader" status indicator that polls every 30 secon
 pgrep -af "live_unified_trader"
 
 # If not running, restart:
-cd /home/tony/ArgusNexus-V4-Core
-PYTHONPATH=/home/tony/ArgusNexus-V4-Core nohup ./venv/bin/python scripts/live_unified_trader.py --capital 10000 >> runtime/paper_trader.log 2>&1 &
+cd /path/to/ArgusNexus
+PYTHONPATH=/path/to/ArgusNexus nohup ./venv/bin/python scripts/live_unified_trader.py --capital 10000 >> runtime/paper_trader.log 2>&1 &
 
 # Verify
 tail -f runtime/paper_trader.log
@@ -383,7 +383,7 @@ tail -f runtime/paper_trader.log
 crontab -l | grep watchdog
 
 # Should show:
-# */2 * * * * /home/tony/ArgusNexus-V4-Core/scripts/watchdog.sh >> /home/tony/ArgusNexus-V4-Core/runtime/watchdog.log 2>&1
+# */2 * * * * /path/to/ArgusNexus/scripts/watchdog.sh >> /path/to/ArgusNexus/runtime/watchdog.log 2>&1
 ```
 
 ### Watchdog Logs

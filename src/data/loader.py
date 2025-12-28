@@ -567,23 +567,22 @@ def fetch_coinbase_data(
     import os
     from datetime import timezone
 
-    # Add V3 connector path
-    v3_connector_path = "/home/tony/ArgusNexus/src"
+    # Add connector path (configurable via environment)
+    v3_connector_path = os.getenv("COINBASE_CONNECTOR_PATH", "./src")
     if v3_connector_path not in sys.path:
         sys.path.insert(0, v3_connector_path)
 
-    # Load V3 environment variables if not already loaded
-    v3_env_path = "/home/tony/ArgusNexus/.env"
-    if os.path.exists(v3_env_path) and not os.getenv("COINBASE_API_KEY"):
+    # Load environment variables if not already loaded
+    if not os.getenv("COINBASE_API_KEY"):
         from dotenv import load_dotenv
-        load_dotenv(v3_env_path)
+        load_dotenv()
 
     try:
         from connectors.coinbase.client import CoinbaseClient
     except ImportError as e:
         raise ImportError(
             f"Coinbase connector not available: {e}\n"
-            "Ensure V3 codebase is at /home/tony/ArgusNexus/src"
+            "Set COINBASE_CONNECTOR_PATH environment variable"
         )
 
     report = DataQualityReport()

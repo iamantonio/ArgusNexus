@@ -14,7 +14,7 @@
 set -e
 
 SERVICE_NAME="argusnexus-v4-paper"
-SERVICE_FILE="/home/tony/ArgusNexus-V4-Core/scripts/argusnexus-v4-paper.service"
+SERVICE_FILE="/path/to/ArgusNexus/scripts/argusnexus-v4-paper.service"
 INSTALL_PATH="/etc/systemd/system/${SERVICE_NAME}.service"
 
 print_banner() {
@@ -88,7 +88,7 @@ run_test() {
     echo "Running quick test (1 tick)..."
     echo ""
 
-    cd /home/tony/ArgusNexus-V4-Core
+    cd /path/to/ArgusNexus
     timeout 60 ./venv/bin/python scripts/live_paper_trader.py --interval 4h || true
 
     echo ""

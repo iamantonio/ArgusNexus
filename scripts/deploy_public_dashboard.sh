@@ -27,7 +27,7 @@ fi
 # Configuration
 DOMAIN="your-domain.com"
 USER="tony"
-WORKDIR="/home/tony/ArgusNexus-V4-Core"
+WORKDIR="/path/to/ArgusNexus"
 VENV="${WORKDIR}/venv"
 PORT=8501
 
