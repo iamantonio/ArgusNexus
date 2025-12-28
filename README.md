@@ -37,7 +37,7 @@
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/ArgusNexus/ArgusNexus.git
+git clone https://github.com/iamantonio/ArgusNexus.git
 cd ArgusNexus
 
 # 2. Create virtual environment
